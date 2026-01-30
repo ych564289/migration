@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+    <classPathEntry location="/Users/fuxiaodong/Downloads/mysql-connector-java-8.0.15.jar" />
+    <context id="crm-knowledge" targetRuntime="MyBatis3">
+
+        <plugin type="org.mybatis.generator.plugins.CaseInsensitiveLikePlugin"/>
+        <plugin type="org.mybatis.generator.plugins.EqualsHashCodePlugin"/>
+        <plugin type="org.mybatis.generator.plugins.RowBoundsPlugin"/>
+        <plugin type="org.mybatis.generator.plugins.SerializablePlugin"/>
+        <plugin type="org.mybatis.generator.plugins.ToStringPlugin"/>
+
+        <commentGenerator>
+            <!-- 指定MBG生成的代码中是否包含任何注释 true为清除注释，false为不清除注释，默认为false -->
+            <property name="suppressAllComments" value="false"/>
+            <!-- 指定生成的注释中是否包含生成的日期 false:注释中带时间，true:注释中不带时间，默认为false -->
+            <property name="suppressDate" value="true"/>
+            <!-- 是否把数据库中的注释生成到代码中,默认为false,如果suppressAllComments设置为true,则该选项无效 -->
+            <property name="addRemarkComments" value="true"/>
+        </commentGenerator>
+
+        <jdbcConnection driverClass="com.mysql.jdbc.Driver"
+                        connectionURL="jdbc:mysql://localhost:3306/pig"
+                        userId="root"
+                        password="12345678"/>
+        <!-- manhattan_buddy -->
+
+        <!-- models -->
+        <javaModelGenerator targetPackage="com.example.migration.dao.master.entity"
+                            targetProject="src/main/java">
+            <property name="enableSubPackages" value="true"/>
+            <property name="trimStrings" value="true"/>
+        </javaModelGenerator>
+
+        <!-- mapper xml files -->
+        <sqlMapGenerator targetPackage="master" targetProject="src/main/resources/mapper">
+            <property name="enableSubPackages" value="true"/>
+        </sqlMapGenerator>
+
+        <!-- mapper interface -->
+        <javaClientGenerator targetPackage="com.example.migration.dao.master.mapper"
+                             targetProject="src/main/java" type="XMLMAPPER">
+            <property name="enableSubPackages" value="true"/>
+        </javaClientGenerator>
+
+        <table tableName="sys_user" domainObjectName="SysUser"/>
+
+    </context>
+</generatorConfiguration>
