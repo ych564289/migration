@@ -21,3 +21,5 @@ o.clntcode, case
 END   ,
 tb.TTLMarketID ,
 o.instrument
+
+into new table  "4.1FINAL_CASHelo_ONHAND"
