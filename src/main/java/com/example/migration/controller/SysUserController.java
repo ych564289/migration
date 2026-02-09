@@ -1,5 +1,6 @@
 package com.example.migration.controller;
 
+import com.example.migration.dao.master.entity.SpCashBalanceClosingAsAt;
 import com.example.migration.dao.master.entity.SysUser;
 import com.example.migration.dao.slave.entity.GenTable;
 import com.example.migration.service.SysUserService;
@@ -25,6 +26,11 @@ public class SysUserController {
     @GetMapping("/getTableList")
     public List<GenTable> getTableList() {
         return sysUserService.getTableList();
+    }
+
+    @GetMapping("/querySpCashBalanceClosingAsAt")
+    public List<SpCashBalanceClosingAsAt> querySpCashBalanceClosingAsAt() {
+        return sysUserService.querySpCashBalanceClosingAsAt();
     }
 
 }

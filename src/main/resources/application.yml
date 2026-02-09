@@ -4,13 +4,27 @@ server:
 
 spring:
   datasource:
+    jackson:
+      date-format: yyyy-MM-dd HH:mm:ss
+      time-zone: GMT+8
     master:
-      driver-class-name: com.mysql.cj.jdbc.Driver
-      jdbc-url: jdbc:mysql://localhost:3306/pig?useSSL=false&serverTimezone=UTC
-      username: root
-      password: 12345678
+      driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+      jdbc-url: jdbc:sqlserver://10.5.80.179:1433;databaseName=OctOBackFT_1231;encrypt=true;trustServerCertificate=true
+      username: pleung
+      password: 123456
+      hikari:
+        maximum-pool-size: 15
+        minimum-idle: 5
     slave:
-      driver-class-name: com.mysql.cj.jdbc.Driver
-      jdbc-url: jdbc:mysql://localhost:3306/pig?useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&allowMultiQueries=true&useSSL=false&allowPublicKeyRetrieval=true
-      username: root
-      password: 12345678
+      driver-class-name: com.ibm.db2.jcc.DB2Driver
+      #url: jdbc:oracle:thin:@10.11.198.16:1721:MSEUZ
+      jdbc-url: jdbc:db2://192.168.20.20:50000/hksfo
+      username: winvest
+      password: PQ22wor6
+      hikari:
+        maximum-pool-size: 15
+        minimum-idle: 5
+
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

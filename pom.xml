@@ -74,6 +74,13 @@
             <version>5.8.26</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.ibm.db2.jcc</groupId>
+            <artifactId>db2jcc</artifactId>
+            <version>db2jcc4</version>
+            <scope>compile</scope>
+        </dependency>
+
     </dependencies>
     <dependencyManagement>
         <dependencies>
