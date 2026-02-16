@@ -19,4 +19,6 @@ public class SpCashBalanceClosingAsAt {
 
     private BigDecimal asAt;
 
+    private String accounts;
+
 }

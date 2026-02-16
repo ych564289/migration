@@ -17,9 +17,9 @@
             resultType="com.example.migration.dao.master.entity.SpCashBalanceClosingAsAt">
 
         EXEC [sp_CashBalance_ClosingAsAt]
-        @AsAt='2023-12-29',
+        @AsAt = #{exportDate},
         @accountnature='client',
-        @balancetype='L';
+        @balancetype = #{balanceType.code};
 
     </select>
 
