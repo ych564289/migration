@@ -71,19 +71,19 @@ public class SettledDataHandle implements ExportDifferentialStrategy {
         criteria.andClientidNotIn(balanceVos.stream()
                         .map(SpCashBalanceVo::getAccounts)
                         .filter(Objects::nonNull) // 过滤空值
-                        .collect(Collectors.toList()))
-                .andAccountseqNotIn(balanceVos.stream()
+                        .collect(Collectors.toList()));
+        criteria.andAccountseqNotIn(balanceVos.stream()
                         .map(SpCashBalanceVo::getAccounts)
                         .filter(Objects::nonNull) // 过滤空值
                         .map(Integer::valueOf) // 转换为 Integer 类型
                         .distinct()
-                        .collect(Collectors.toList()))
-                .andCurrencyidNotIn(balanceVos.stream()
+                        .collect(Collectors.toList()));
+        criteria.andCurrencyidNotIn(balanceVos.stream()
                         .map(SpCashBalanceVo::getCcy)
                         .filter(Objects::nonNull)
                         .distinct()
-                        .collect(Collectors.toList()))
-                .andLedgerbalNotIn(balanceVos.stream()
+                        .collect(Collectors.toList()));
+        criteria.andLedgerbalNotIn(balanceVos.stream()
                         .map(SpCashBalanceVo::getBalance)
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList()));
@@ -117,14 +117,14 @@ public class SettledDataHandle implements ExportDifferentialStrategy {
         criteria.andClientidIn(balanceVos.stream()
                         .map(SpCashBalanceVo::getAccounts)
                         .filter(Objects::nonNull) // 过滤空值
-                        .collect(Collectors.toList()))
-                .andAccountseqIn(balanceVos.stream()
+                        .collect(Collectors.toList()));
+        criteria.andAccountseqIn(balanceVos.stream()
                         .map(SpCashBalanceVo::getAccounts)
                         .filter(Objects::nonNull) // 过滤空值
                         .map(Integer::valueOf) // 转换为 Integer 类型
                         .distinct()
-                        .collect(Collectors.toList()))
-                .andCurrencyidIn(balanceVos.stream()
+                        .collect(Collectors.toList()));
+        criteria.andCurrencyidIn(balanceVos.stream()
                         .map(SpCashBalanceVo::getCcy)
                         .filter(Objects::nonNull)
                         .distinct()
