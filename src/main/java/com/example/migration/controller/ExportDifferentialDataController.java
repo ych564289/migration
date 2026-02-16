@@ -4,10 +4,7 @@ import com.example.migration.dao.master.entity.SpCashBalanceClosingAsAt;
 import com.example.migration.pojo.export.req.CashExportReq;
 import com.example.migration.service.ExportDifferentialDataService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -20,7 +17,7 @@ public class ExportDifferentialDataController {
     @Autowired
     private ExportDifferentialDataService sysUserService;
 
-    @GetMapping("/cash/export")
+    @PostMapping("/cash/export")
     public void cashExport(@RequestBody CashExportReq req, HttpServletResponse response) {
         try {
             sysUserService.cashExport(req,response);
