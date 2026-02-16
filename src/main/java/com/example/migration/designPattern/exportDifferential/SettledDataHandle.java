@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -158,13 +159,13 @@ public class SettledDataHandle implements ExportDifferentialStrategy {
                 .collect(Collectors.toList());
 
         // 构建账户映射关系
-        CmsViewExample example = new CmsViewExample();
-        example.createCriteria()
-                .andAccountcodeIn(spCashBalanceClosingAsAts.stream()
-                        .map(SpCashBalanceClosingAsAt::getClntCode)
-                        .filter(Objects::nonNull) // 过滤空值
-                        .collect(Collectors.toList()));
-        List<CmsView> cmsViews = cmsViewMapper.selectByExample(example);
+//        CmsViewExample example = new CmsViewExample();
+//        example.createCriteria()
+//                .andAccountcodeIn(spCashBalanceClosingAsAts.stream()
+//                        .map(SpCashBalanceClosingAsAt::getClntCode)
+//                        .filter(Objects::nonNull) // 过滤空值
+//                        .collect(Collectors.toList()));
+        List<CmsView> cmsViews = fetchCmsViewsInParallel(spCashBalanceClosingAsAts);
         Map<String, String> acctMap = cmsViews.stream()
                 .collect(Collectors.toMap(CmsView::getAccountcode, CmsView::getDefaulttradingacc, (a, b) -> a));
 
@@ -217,5 +218,46 @@ public class SettledDataHandle implements ExportDifferentialStrategy {
             balanceVo.setCcy(CcyTypeEnum.getByCodeMapping(balanceVo.getCcy()));
         }
         return balanceVos;
+    }
+
+    private List<CmsView> fetchCmsViewsInParallel(List<SpCashBalanceClosingAsAt> spCashBalanceClosingAsAts) {
+        List<CmsView> cmsViews = new ArrayList<>();
+        List<String> accountCodes = spCashBalanceClosingAsAts.stream()
+                .map(SpCashBalanceClosingAsAt::getClntCode)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+
+        int batchSize = 1000;
+        int threadCount = Runtime.getRuntime().availableProcessors(); // 获取可用核心数作为线程数
+        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+        List<Future<List<CmsView>>> futures = new ArrayList<>();
+
+        // 提交任务到线程池
+        for (int i = 0; i < accountCodes.size(); i += batchSize) {
+            int endIndex = Math.min(i + batchSize, accountCodes.size());
+            List<String> batchAccountCodes = accountCodes.subList(i, endIndex);
+
+            Callable<List<CmsView>> task = () -> {
+                CmsViewExample example = new CmsViewExample();
+                example.createCriteria().andAccountcodeIn(batchAccountCodes);
+                return cmsViewMapper.selectByExample(example);
+            };
+
+            Future<List<CmsView>> future = executorService.submit(task);
+            futures.add(future);
+        }
+
+        // 收集所有线程的结果
+        for (Future<List<CmsView>> future : futures) {
+            try {
+                cmsViews.addAll(future.get()); // 等待任务完成并获取结果
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        executorService.shutdown(); // 关闭线程池
+        return cmsViews;
     }
 }
