@@ -113,8 +113,8 @@ public class SettledDataHandle implements ExportDifferentialStrategy {
                                                      List<SpCashBalanceVo> exclusiveList) {
 
         VcbaccountExample example = new VcbaccountExample();
-        example.createCriteria()
-                .andClientidIn(balanceVos.stream()
+        VcbaccountExample.Criteria criteria = example.createCriteria();
+        criteria.andClientidIn(balanceVos.stream()
                         .map(SpCashBalanceVo::getAccounts)
                         .filter(Objects::nonNull) // 过滤空值
                         .collect(Collectors.toList()))
