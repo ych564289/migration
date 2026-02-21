@@ -66,28 +66,12 @@ public class SettledDataHandle implements ExportDifferentialStrategy {
      **/
     private List<SpCashBalanceVo> ttlDataCollectionProcess(List<SpCashBalanceVo> balanceVos) {
         List<SpCashBalanceVo> ttlList = new ArrayList<>();
-        VcbaccountExample example = new VcbaccountExample();
-        VcbaccountExample.Criteria criteria = example.createCriteria();
-        criteria.andClientidNotIn(balanceVos.stream()
-                        .map(SpCashBalanceVo::getClntCode)
-                        .filter(Objects::nonNull) // 过滤空值
-                        .collect(Collectors.toList()));
-        criteria.andAccountseqNotIn(balanceVos.stream()
-                        .map(SpCashBalanceVo::getAccounts)
-                        .filter(Objects::nonNull) // 过滤空值
-                        .map(Integer::valueOf) // 转换为 Integer 类型
-                        .distinct()
-                        .collect(Collectors.toList()));
-        criteria.andCurrencyidNotIn(balanceVos.stream()
-                        .map(SpCashBalanceVo::getCcy)
-                        .filter(Objects::nonNull)
-                        .distinct()
-                        .collect(Collectors.toList()));
-        criteria.andLedgerbalNotIn(balanceVos.stream()
-                        .map(SpCashBalanceVo::getBalance)
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList()));
-        List<Vcbaccount> vcbaccounts = vcbaccountMapper.selectByExample(example);
+        List<BigDecimal> balanceList = balanceVos.stream()
+                .map(SpCashBalanceVo::getBalance)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        List<Vcbaccount> vcbaccounts = fetchVcbaccountsInParallel(balanceVos,"1");
+        vcbaccounts = vcbaccounts.stream().filter(e -> balanceList.contains(e.getLedgerbal())).collect(Collectors.toList());
         for (Vcbaccount vcbaccount : vcbaccounts) {
             SpCashBalanceVo vo = new SpCashBalanceVo();
             vo.setClntCode(vcbaccount.getClientid());
@@ -112,24 +96,7 @@ public class SettledDataHandle implements ExportDifferentialStrategy {
                                                      List<SpCashBalanceVo> abnormalList,
                                                      List<SpCashBalanceVo> exclusiveList) {
 
-        VcbaccountExample example = new VcbaccountExample();
-        VcbaccountExample.Criteria criteria = example.createCriteria();
-        criteria.andClientidIn(balanceVos.stream()
-                        .map(SpCashBalanceVo::getClntCode)
-                        .filter(Objects::nonNull) // 过滤空值
-                        .collect(Collectors.toList()));
-        criteria.andAccountseqIn(balanceVos.stream()
-                        .map(SpCashBalanceVo::getAccounts)
-                        .filter(Objects::nonNull) // 过滤空值
-                        .map(Integer::valueOf) // 转换为 Integer 类型
-                        .distinct()
-                        .collect(Collectors.toList()));
-        criteria.andCurrencyidIn(balanceVos.stream()
-                        .map(SpCashBalanceVo::getCcy)
-                        .filter(Objects::nonNull)
-                        .distinct()
-                        .collect(Collectors.toList()));
-        List<Vcbaccount> vcbaccounts = vcbaccountMapper.selectByExample(example);
+        List<Vcbaccount> vcbaccounts = fetchVcbaccountsInParallel(balanceVos,null);
         Map<String, BigDecimal> decimalMap = vcbaccounts.stream()
                 .collect(Collectors.toMap(e -> e.getClientid() + e.getAccountseq() + e.getCurrencyid(), Vcbaccount::getLedgerbal, (a, b) -> a));
         for (SpCashBalanceVo balanceVo : balanceVos) {
@@ -260,5 +227,76 @@ public class SettledDataHandle implements ExportDifferentialStrategy {
 
         executorService.shutdown(); // 关闭线程池
         return cmsViews;
+    }
+
+    /**
+     * 获取vcbaccount表数据 多线程处理
+     * @param balanceVos
+     * @param clntCode 控制查询条件
+     * @return
+     */
+    private List<Vcbaccount> fetchVcbaccountsInParallel(List<SpCashBalanceVo> balanceVos,String clntCode) {
+        List<Vcbaccount> result = new ArrayList<>();
+
+        // 提取参数并去重
+        List<String> clientIds = balanceVos.stream()
+                .map(SpCashBalanceVo::getClntCode)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<Integer> accountSeqs = balanceVos.stream()
+                .map(SpCashBalanceVo::getAccounts)
+                .filter(Objects::nonNull)
+                .map(Integer::valueOf)
+                .distinct()
+                .collect(Collectors.toList());
+
+        List<String> currencyIds = balanceVos.stream()
+                .map(SpCashBalanceVo::getCcy)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+
+        int batchSize = 1000;
+        int threadCount = Runtime.getRuntime().availableProcessors(); // 获取可用核心数作为线程数
+        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+        List<Future<List<Vcbaccount>>> futures = new ArrayList<>();
+
+        // 拆分 clientIds 并提交任务
+        for (int i = 0; i < clientIds.size(); i += batchSize) {
+            int endIndex = Math.min(i + batchSize, clientIds.size());
+            List<String> batchClientIds = clientIds.subList(i, endIndex);
+
+            Callable<List<Vcbaccount>> task = () -> {
+                VcbaccountExample example = new VcbaccountExample();
+                VcbaccountExample.Criteria criteria = example.createCriteria();
+                if (clntCode != null) {
+                    criteria.andClientidNotIn(batchClientIds);
+                    criteria.andAccountseqNotIn(accountSeqs);
+                    criteria.andCurrencyidNotIn(currencyIds);
+                }else {
+                    criteria.andClientidIn(batchClientIds);
+                    criteria.andAccountseqIn(accountSeqs);
+                    criteria.andCurrencyidIn(currencyIds);
+                }
+                return vcbaccountMapper.selectByExample(example);
+            };
+
+            Future<List<Vcbaccount>> future = executorService.submit(task);
+            futures.add(future);
+        }
+
+        // 收集所有线程的结果
+        for (Future<List<Vcbaccount>> future : futures) {
+            try {
+                result.addAll(future.get()); // 等待任务完成并获取结果
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to fetch Vcbaccount data", e);
+            }
+        }
+
+        executorService.shutdown(); // 关闭线程池
+        return result;
     }
 }
