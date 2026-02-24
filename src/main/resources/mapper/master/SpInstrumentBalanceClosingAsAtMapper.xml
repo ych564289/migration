@@ -9,17 +9,20 @@
         <result column="ClntCode" jdbcType="VARCHAR" property="clntCode" />
         <result column="AcctType" jdbcType="VARCHAR" property="acctType" />
         <result column="Market" jdbcType="VARCHAR" property="market" />
-        <result column="CCY" jdbcType="VARCHAR" property="ccy" />
+        <result column="TradingCcy" jdbcType="VARCHAR" property="tradingCcy" />
+        <result column="Instrument" jdbcType="VARCHAR" property="instrument" />
         <result column="BalanceType" jdbcType="VARCHAR" property="balanceType" />
         <result column="AsAt" jdbcType="DECIMAL" property="asAt" />
     </resultMap>
 
     <select id="querySpInstrumentBalanceClosingAsAt"
             resultType="com.example.migration.dao.master.entity.SpInstrumentBalanceClosingAsAt">
+
         EXEC [sp_InstrumentBalance_ClosingAsAt]
         @AsAt = #{exportDate},
         @accountnature='client',
         @balancetype = #{balanceType.code};
+
     </select>
 
 
