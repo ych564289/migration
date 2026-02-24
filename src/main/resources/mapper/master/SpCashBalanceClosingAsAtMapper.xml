@@ -23,5 +23,13 @@
 
     </select>
 
+    <select id="querySpInstrumentBalanceClosingAsAt"
+            resultType="com.example.migration.dao.master.entity.SpInstrumentBalanceClosingAsAt">
+        EXEC [sp_InstrumentBalance_ClosingAsAt]
+        @AsAt = #{exportDate},
+        @accountnature='client',
+        @balancetype = #{balanceType.code};
+    </select>
+
 
 </mapper>
