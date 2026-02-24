@@ -52,13 +52,13 @@ public class ExportDifferentialServiceImpl implements ExportDifferentialDataServ
         WriteSheet writeSheet3 = EasyExcel.writerSheet(2, "存储过程特有")
                 .head(SpCashBalanceVo.class) // 表头类
                 .build();
-        excelWriter.write(map.get("abnormalList"), writeSheet3);
+        excelWriter.write(map.get("exclusiveList"), writeSheet3);
 
         // 定义第四个 Sheet
         WriteSheet writeSheet4 = EasyExcel.writerSheet(3, "ttl特有")
                 .head(SpCashBalanceVo.class) // 表头类
                 .build();
-        excelWriter.write(map.get("abnormalList"), writeSheet4);
+        excelWriter.write(map.get("ttlList"), writeSheet4);
 
         // 关闭写入器，确保数据写入完成
         excelWriter.finish();
