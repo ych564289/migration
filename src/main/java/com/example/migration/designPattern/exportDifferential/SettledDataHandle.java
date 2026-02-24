@@ -123,6 +123,11 @@ public class SettledDataHandle implements ExportDifferentialStrategy {
         spCashBalanceClosingAsAts = spCashBalanceClosingAsAts.stream()
                 .filter(closingAsAt -> closingAsAt.getClntCode() == null ||
                         !closingAsAt.getClntCode().startsWith("C"))
+                .peek(e -> {
+                    if (e.getClntCode() != null) {
+                        e.setClntCode(e.getClntCode().trim()); // 先 trim 再设置
+                    }
+                })
                 .collect(Collectors.toList());
 
         // 构建账户映射关系
