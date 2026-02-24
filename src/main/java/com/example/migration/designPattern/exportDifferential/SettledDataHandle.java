@@ -163,11 +163,11 @@ public class SettledDataHandle implements ExportDifferentialStrategy {
                     if (accountEntry.getValue().size() > 0) {
                         for (Map.Entry<String, List<SpCashBalanceClosingAsAt>> currencyEntry : accountEntry.getValue().entrySet()) {
                             if (currencyEntry.getValue().size() > 0) {
-                                SpCashBalanceVo vo = new SpCashBalanceVo();
                                 SpCashBalanceClosingAsAt firstRecord = currencyEntry.getValue().get(0); // 安全获取第一条记录
                                 if (firstRecord != null) {
+                                    SpCashBalanceVo vo = new SpCashBalanceVo();
                                     vo.setClntCode(firstRecord.getClntCode());
-                                    vo.setAccounts(firstRecord.getAcctType());
+                                    vo.setAccounts(firstRecord.getAccounts());
                                     vo.setCcy(firstRecord.getCcy());
                                     vo.setBalance(currencyEntry.getValue().stream()
                                             .map(SpCashBalanceClosingAsAt::getAsAt)
