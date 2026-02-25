@@ -12,8 +12,13 @@ from TTLMQOrders where SubAccountID  like '%068927%' and MQdatetime >= '2024-12-
 
 ----- Cash ----
 
-select SubAccountID , SUM(convert(DECIMAL(16,8), CashLedgerDelta )) from   TTLMQOrders where SubAccountID like '%212291%'
-                                                                                         and MQdatetime >= '2024-07-31 19:00:00.000' and MQstatus <> 'Fail' and convert(DECIMAL(16,8), CashLedgerDelta) <> 0 group by SubAccountID
+select SubAccountID , SUM(convert(DECIMAL(16,8), CashLedgerDelta )) from   TTLMQOrders
+where SubAccountID like '%212291%'
+ and MQdatetime >= '2024-07-31 19:00:00.000' and MQstatus <> 'Fail' and convert(DECIMAL(16,8), CashLedgerDelta) <> 0
+ group by SubAccountID
 
-
+-- 金额
+CINACTIVEBUY,ctodaybuy,CTODAYCONFIRMBUY,CINACTIVESELL,ctodaysell,CTODAYCONFIRMSELL
+--股数
+TINACTIVEBUY , TINACTIVESELL ,TTODAYBUY , TTODAYSELL , TTODAYCONFIRMBUY , TTODAYCONFIRMSELL
 
