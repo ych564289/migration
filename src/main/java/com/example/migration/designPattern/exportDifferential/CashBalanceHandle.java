@@ -82,9 +82,27 @@ public class CashBalanceHandle implements ExportDifferentialStrategy {
             return;
         }
 
-        for (ExportTransferVo vo : abnormalList) {
-            // 根据 BalanceType 动态处理
-            processBalanceType(req.getBalanceType(), vo, req);
+        int threadCount = Runtime.getRuntime().availableProcessors(); // 获取可用核心数作为线程数
+        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+
+        try {
+            List<Future<?>> futures = new ArrayList<>();
+            for (ExportTransferVo vo : abnormalList) {
+                Future<?> future = executorService.submit(() -> {
+                    // 根据 BalanceType 动态处理
+                    processBalanceType(req.getBalanceType(), vo, req);
+                });
+                futures.add(future);
+            }
+
+            // 等待所有任务完成
+            for (Future<?> future : futures) {
+                future.get(); // 阻塞直到任务完成
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to process setErrorReason in parallel", e);
+        } finally {
+            executorService.shutdown(); // 关闭线程池
         }
     }
 
