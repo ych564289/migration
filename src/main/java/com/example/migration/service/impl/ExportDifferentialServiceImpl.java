@@ -73,8 +73,8 @@ public class ExportDifferentialServiceImpl implements ExportDifferentialDataServ
                 .head(clazz)
                 .build();
 
-        List<T> sameList = convertToList(map.get("sameList"), constructor);
         List<T> abnormalList = convertToList(map.get("abnormalList"), constructor);
+        List<T> sameList = convertToList(map.get("sameList"), constructor);
         List<T> exclusiveList = convertToList(map.get("exclusiveList"), constructor);
         List<T> ttlList = convertToList(map.get("ttlList"), constructor);
 
@@ -82,7 +82,7 @@ public class ExportDifferentialServiceImpl implements ExportDifferentialDataServ
         abnormalList.addAll(ttlList);
         abnormalList.addAll(sameList);
 
-        excelWriter.write(sameList, writeSheet);
+        excelWriter.write(abnormalList, writeSheet);
     }
 
     /**
