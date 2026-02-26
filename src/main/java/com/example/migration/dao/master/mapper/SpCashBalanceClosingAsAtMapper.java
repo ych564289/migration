@@ -11,6 +11,4 @@ import java.util.List;
 public interface SpCashBalanceClosingAsAtMapper {
 
     List<SpCashBalanceClosingAsAt> querySpCashBalanceClosingAsAt(CashExportReq req);
-
-    List<CashBalanceSQLVo> querySqlList(@Param("sql") String  sql);
 }

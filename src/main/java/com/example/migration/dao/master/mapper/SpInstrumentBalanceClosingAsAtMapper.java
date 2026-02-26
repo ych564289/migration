@@ -11,6 +11,4 @@ public interface SpInstrumentBalanceClosingAsAtMapper {
 
     List<SpInstrumentBalanceClosingAsAt> querySpInstrumentBalanceClosingAsAt(CashExportReq req);
 
-    List<InstrumentSQLVo> querySqlList(@Param("sql") String  sql);
-
 }

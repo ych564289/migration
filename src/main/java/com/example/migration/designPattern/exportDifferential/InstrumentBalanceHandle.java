@@ -9,6 +9,7 @@ import com.example.migration.dao.master.mapper.TTLMarketBoardMapper;
 import com.example.migration.dao.slave.entity.Vcbaccount;
 import com.example.migration.dao.slave.entity.Vcbtradingacc;
 import com.example.migration.dao.slave.entity.VcbtradingaccExample;
+import com.example.migration.dao.slave.mapper.ScdummyMapper;
 import com.example.migration.dao.slave.mapper.VcbtradingaccMapper;
 import com.example.migration.designPattern.ExportDifferentialStrategy;
 import com.example.migration.enumeration.export.AcctTypeEnum;
@@ -53,7 +54,8 @@ public class InstrumentBalanceHandle implements ExportDifferentialStrategy {
     @Autowired
     private TTLMQOrdersMapper ttlMQOrdersMapper;
 
-
+    @Autowired
+    private ScdummyMapper scdummyMapper;
 
 
     @Override
@@ -174,7 +176,7 @@ public class InstrumentBalanceHandle implements ExportDifferentialStrategy {
         if (StringUtils.isEmpty(req.getSqlInfo())) {
             return;
         }
-        List<InstrumentSQLVo> sqlList = spInstrumentBalanceClosingAsAtMapper.querySqlList(req.getSqlInfo());
+        List<InstrumentSQLVo> sqlList = scdummyMapper.queryInstrumentSqlList(req.getSqlInfo());
         List<InstrumentSQLVo> filteredSqlList = sqlList.stream()
                 .filter(e -> e.getClientid().equals(vo.getClntCode())
                         && e.getTtlmarketid().equals(vo.getMarketId())

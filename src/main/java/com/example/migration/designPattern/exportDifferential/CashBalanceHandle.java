@@ -7,6 +7,7 @@ import com.example.migration.dao.master.mapper.SpCashBalanceClosingAsAtMapper;
 import com.example.migration.dao.master.mapper.TTLMQOrdersMapper;
 import com.example.migration.dao.slave.entity.Vcbaccount;
 import com.example.migration.dao.slave.entity.VcbaccountExample;
+import com.example.migration.dao.slave.mapper.ScdummyMapper;
 import com.example.migration.dao.slave.mapper.VcbaccountMapper;
 import com.example.migration.designPattern.ExportDifferentialStrategy;
 import com.example.migration.enumeration.export.AcctTypeEnum;
@@ -44,6 +45,9 @@ public class CashBalanceHandle implements ExportDifferentialStrategy {
 
     @Autowired
     private TTLMQOrdersMapper ttlMQOrdersMapper;
+
+    @Autowired
+    private ScdummyMapper scdummyMapper;
 
     @Override
     public DataSourceTypeEnum getDataSourceType() {
@@ -165,7 +169,7 @@ public class CashBalanceHandle implements ExportDifferentialStrategy {
         if (StringUtils.isEmpty(req.getSqlInfo())) {
             return;
         }
-        List<CashBalanceSQLVo> sqlList = spCashBalanceClosingAsAtMapper.querySqlList(req.getSqlInfo());
+        List<CashBalanceSQLVo> sqlList = scdummyMapper.queryCashBalanceSqlList(req.getSqlInfo());
         List<CashBalanceSQLVo> filteredSqlList = sqlList.stream()
                 .filter(e -> e.getClientid().equals(vo.getClntCode())
                         && e.getCcy().equals(vo.getCcy())
