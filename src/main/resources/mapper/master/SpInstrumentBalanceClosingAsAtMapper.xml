@@ -25,5 +25,9 @@
 
     </select>
 
+    <select id="querySqlList" resultType="com.example.migration.pojo.export.vo.InstrumentSQLVo">
+        ${sql}
+    </select>
+
 
 </mapper>

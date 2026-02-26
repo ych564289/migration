@@ -5,7 +5,6 @@ public enum BalancetypeEnum {
     O("O","Settled"),
     L("L","Ledger"),
     D("D","Hold Dr"),
-    C("C","Hold Cr"),
     ;
 
     private String code;

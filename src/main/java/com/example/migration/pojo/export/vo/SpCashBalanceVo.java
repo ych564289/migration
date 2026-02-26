@@ -20,7 +20,21 @@ public class SpCashBalanceVo {
     @ExcelProperty("balance")
     private BigDecimal balance;
 
+    @ExcelProperty("ttl-clientid")
+    private String ttlClientid;
+
+    @ExcelProperty("ttl-accountseq")
+    private String ttlAccountseq;
+
+    @ExcelProperty("ttl-currencyid")
+    private String ttlCurrencyid;
+
+    @ExcelProperty("ttl-ledgerbal")
+    private BigDecimal ttlLedgerbal;
+
     @ExcelProperty("reason")
     private String reason;
+
+
 
 }

@@ -22,5 +22,8 @@
         @balancetype = #{balanceType.code};
 
     </select>
+    <select id="querySqlList" resultType="com.example.migration.pojo.export.vo.CashBalanceSQLVo">
+        ${sql}
+    </select>
 
 </mapper>

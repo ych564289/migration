@@ -18,7 +18,12 @@ where SubAccountID like '%212291%'
  group by SubAccountID
 
 -- 金额
-CINACTIVEBUY,ctodaybuy,CTODAYCONFIRMBUY,CINACTIVESELL,ctodaysell,CTODAYCONFIRMSELL
+CINACTIVEBUY,ctodaybuy,CTODAYCONFIRMBUY,CINACTIVESELL,CTODAYSELL,CTODAYCONFIRMSELL
 --股数
 TINACTIVEBUY , TINACTIVESELL ,TTODAYBUY , TTODAYSELL , TTODAYCONFIRMBUY , TTODAYCONFIRMSELL
 
+SELECT  '003901' AS clientid, 'HKEX' AS ttlmarketid,'01666'            AS instrument,  28000   AS issueamt , 'TTL BO issue - Missing MQ' AS rem FROM  SCDUMMY UNION ALL
+SELECT  '912977' AS clientid, 'HKEX' AS ttlmarketid,'00001'            AS instrument,  52500   AS issueamt , 'TTL BO issue - Missing MQ' AS rem FROM  SCDUMMY UNION ALL
+SELECT  '181281' AS clientid, 'SPMK' AS ttlmarketid,'NDF-230822-BAML1' AS instrument,  1       AS issueamt , 'TTL BO issue - Missing MQ' AS rem FROM  SCDUMMY  UNION ALL
+SELECT  '201378' AS clientid, 'SPMK' AS ttlmarketid,'XS2957448553'     AS instrument,  -288000 AS issueamt , 'Octoback Issue: No cancel date on 90685703 result in no cancellation on octoback' AS rem FROM  SCDUMMY UNION ALL
+SELECT  '208183' AS clientid, 'HKEX' AS ttlmarketid,'07226'            AS instrument,  350000  AS issueamt , 'TTL BO issue - Missing MQ' AS rem FROM  SCDUMMY

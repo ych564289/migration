@@ -21,4 +21,8 @@ public class SpInstrumentBalanceClosingAsAt {
 
     private BigDecimal asAt;
 
+    private String accounts;
+
+    private String ttlMarketID;
+
 }
