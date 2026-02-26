@@ -27,3 +27,13 @@ SELECT  '912977' AS clientid, 'HKEX' AS ttlmarketid,'00001'            AS instru
 SELECT  '181281' AS clientid, 'SPMK' AS ttlmarketid,'NDF-230822-BAML1' AS instrument,  1       AS issueamt , 'TTL BO issue - Missing MQ' AS rem FROM  SCDUMMY  UNION ALL
 SELECT  '201378' AS clientid, 'SPMK' AS ttlmarketid,'XS2957448553'     AS instrument,  -288000 AS issueamt , 'Octoback Issue: No cancel date on 90685703 result in no cancellation on octoback' AS rem FROM  SCDUMMY UNION ALL
 SELECT  '208183' AS clientid, 'HKEX' AS ttlmarketid,'07226'            AS instrument,  350000  AS issueamt , 'TTL BO issue - Missing MQ' AS rem FROM  SCDUMMY
+
+SELECT  '186602' AS clientid, 'HKD' AS ccy, -110.48 - 1470.64 AS issueamt , 'TTL BO issue - Missing MQ' AS rem FROM  SCDUMMY UNION ALL
+SELECT  '091757' AS clientid, 'USD' AS ccy, 197675.18 - 197673.84 AS issueamt , 'TTL BO issue - Missing MQ' AS rem FROM  SCDUMMY UNION ALL
+SELECT  '006451' AS clientid, 'HKD' AS ccy, 2341833.35 - 2338938.98 AS issueamt , 'TTL BO issue - Missing MQ' AS rem FROM  SCDUMMY  UNION ALL
+SELECT  '083282' AS clientid, 'HKD' AS ccy, -53.0 AS issueamt , 'TTL BO issue - Missing MQ' AS rem FROM  SCDUMMY
+
+SELECT  '186602' AS clientid, 'HKD' AS ccy, -110.48 - 1470.64 AS issueamt , 'TTL BO issue - Missing MQ' AS rem FROM  SCDUMMY UNION ALL SELECT  '091757' AS clientid, 'USD' AS ccy, 197675.18 - 197673.84 AS issueamt , 'TTL BO issue - Missing MQ' AS rem FROM  SCDUMMY UNION ALL SELECT  '006451' AS clientid, 'HKD' AS ccy, 2341833.35 - 2338938.98 AS issueamt , 'TTL BO issue - Missing MQ' AS rem FROM  SCDUMMY  UNION ALL SELECT  '083282' AS clientid, 'HKD' AS ccy, -53.0 AS issueamt , 'TTL BO issue - Missing MQ' AS rem FROM  SCDUMMY
+
+
+
