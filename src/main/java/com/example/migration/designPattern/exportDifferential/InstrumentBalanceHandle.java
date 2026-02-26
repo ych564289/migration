@@ -351,11 +351,11 @@ public class InstrumentBalanceHandle implements ExportDifferentialStrategy {
                     criteria.andTradingaccseqNotIn(accountSeqs);
                     criteria.andMarketidNotIn(marketIds);
                     criteria.andInstrumentidNotIn(integers);
-                    if (balances.equals(BalancetypeEnum.L)) {
+                    if (balanceType.equals(BalancetypeEnum.L)) {
                         criteria.andLedgerqtyNotIn(balances);
-                    }else if (balances.equals(BalancetypeEnum.D)) {
+                    }else if (balanceType.equals(BalancetypeEnum.D)) {
                         criteria.andTmanualholdNotIn(balances);
-                    }else if (balances.equals(BalancetypeEnum.O)) {
+                    }else if (balanceType.equals(BalancetypeEnum.O)) {
                         criteria.andTsettledNotIn(balances);
                     }
                 }else {

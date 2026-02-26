@@ -458,11 +458,11 @@ public class CashBalanceHandle implements ExportDifferentialStrategy {
                     criteria.andClientidNotIn(batchClientIds);
                     criteria.andAccountseqNotIn(accountSeqs);
                     criteria.andCurrencyidNotIn(currencyIds);
-                    if (balances.equals(BalancetypeEnum.L)) {
+                    if (balanceType.equals(BalancetypeEnum.L)) {
                         criteria.andLedgerbalNotIn(balances);
-                    }else if (balances.equals(BalancetypeEnum.D)) {
+                    }else if (balanceType.equals(BalancetypeEnum.D)) {
                         criteria.andCmanualholdNotIn(balances);
-                    }else if (balances.equals(BalancetypeEnum.O)) {
+                    }else if (balanceType.equals(BalancetypeEnum.O)) {
                         criteria.andCsettledNotIn(balances);
                     }
                 }else {
