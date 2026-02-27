@@ -263,26 +263,38 @@ public class InstrumentBalanceHandle implements ExportDifferentialStrategy {
     private List<Vcbtradingacc> fetchVcbtradingaccPaginated() {
         List<Vcbtradingacc> result = new ArrayList<>();
         int pageSize = 1000;
-        int offset = 0;
-        boolean hasMoreData = true;
+        int totalRecords = (int) vcbtradingaccMapper.countByExample(null); // 获取总记录数
+        int totalPages = (int) Math.ceil((double) totalRecords / pageSize); // 计算总页数
 
-        while (hasMoreData) {
-            // 构造分页查询条件
-            VcbtradingaccExample example = new VcbtradingaccExample();
-            RowBounds rowBounds = new RowBounds(offset * pageSize, pageSize);
-            // 执行查询
-            List<Vcbtradingacc> batch = vcbtradingaccMapper.selectByExampleWithRowbounds(example,rowBounds);
+        int threadCount = Runtime.getRuntime().availableProcessors(); // 获取可用核心数作为线程数
+        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+        List<Future<List<Vcbtradingacc>>> futures = new ArrayList<>();
 
-            // 添加到结果集中
-            result.addAll(batch);
-
-            // 判断是否还有更多数据
-            if (batch.size() < pageSize) {
-                hasMoreData = false;
-            } else {
-                offset += pageSize;
+        try {
+            // 提交任务到线程池
+            for (int page = 0; page < totalPages; page++) {
+                final int currentPage = page;
+                Callable<List<Vcbtradingacc>> task = () -> {
+                    VcbtradingaccExample example = new VcbtradingaccExample();
+                    RowBounds rowBounds = new RowBounds(currentPage * pageSize, pageSize);
+                    return vcbtradingaccMapper.selectByExampleWithRowbounds(example, rowBounds);
+                };
+                Future<List<Vcbtradingacc>> future = executorService.submit(task);
+                futures.add(future);
             }
+
+            // 收集所有线程的结果
+            for (Future<List<Vcbtradingacc>> future : futures) {
+                try {
+                    result.addAll(future.get()); // 等待任务完成并获取结果
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to fetch Vcbtradingacc data", e);
+                }
+            }
+        } finally {
+            executorService.shutdown(); // 关闭线程池
         }
+
         return result;
     }
 
