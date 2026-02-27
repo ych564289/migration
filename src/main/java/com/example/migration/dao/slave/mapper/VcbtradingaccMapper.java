@@ -70,4 +70,6 @@ public interface VcbtradingaccMapper {
      * @mbg.generated
      */
     int updateByExample(@Param("record") Vcbtradingacc record, @Param("example") VcbtradingaccExample example);
+
+    List<Vcbtradingacc> selectByExampleWithLimit(RowBounds rowBounds);
 }

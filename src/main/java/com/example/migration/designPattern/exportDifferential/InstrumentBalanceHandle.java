@@ -275,9 +275,8 @@ public class InstrumentBalanceHandle implements ExportDifferentialStrategy {
             for (int page = 0; page < totalPages; page++) {
                 final int currentPage = page;
                 Callable<List<Vcbtradingacc>> task = () -> {
-                    VcbtradingaccExample example = new VcbtradingaccExample();
                     RowBounds rowBounds = new RowBounds(currentPage * pageSize, pageSize);
-                    return vcbtradingaccMapper.selectByExampleWithRowbounds(example, rowBounds);
+                    return vcbtradingaccMapper.selectByExampleWithLimit(rowBounds);
                 };
                 Future<List<Vcbtradingacc>> future = executorService.submit(task);
                 futures.add(future);
