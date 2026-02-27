@@ -21,6 +21,7 @@ import com.example.migration.pojo.export.vo.CashBalanceSQLVo;
 import com.example.migration.pojo.export.vo.ExportTransferVo;
 import com.example.migration.pojo.export.vo.InstrumentSQLVo;
 import com.example.migration.pojo.export.vo.SpCashBalanceVo;
+import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -220,7 +221,7 @@ public class InstrumentBalanceHandle implements ExportDifferentialStrategy {
      **/
     private List<ExportTransferVo> ttlDataCollectionProcess(List<ExportTransferVo> balanceVos,CashExportReq req) {
         List<ExportTransferVo> ttlList = new ArrayList<>();
-        List<Vcbtradingacc> vcbtradingaccs = vcbtradingaccMapper.selectByExample(null);
+        List<Vcbtradingacc> vcbtradingaccs = fetchVcbtradingaccPaginated();
         Map<String, ExportTransferVo> voMap = balanceVos.stream()
                 .collect(Collectors.toMap(
                                 e -> e.getClntCode() + e.getInstrument() + e.getMarketId() + e.getAccounts(),
@@ -253,6 +254,36 @@ public class InstrumentBalanceHandle implements ExportDifferentialStrategy {
             ttlList.add(vo);
         }
         return ttlList;
+    }
+
+    /**
+     * 分页查询 Vcbtradingacc 表数据，每次查询1000条并收集
+     * @return 所有 Vcbtradingacc 数据
+     */
+    private List<Vcbtradingacc> fetchVcbtradingaccPaginated() {
+        List<Vcbtradingacc> result = new ArrayList<>();
+        int pageSize = 1000;
+        int offset = 0;
+        boolean hasMoreData = true;
+
+        while (hasMoreData) {
+            // 构造分页查询条件
+            VcbtradingaccExample example = new VcbtradingaccExample();
+            RowBounds rowBounds = new RowBounds(offset * pageSize, pageSize);
+            // 执行查询
+            List<Vcbtradingacc> batch = vcbtradingaccMapper.selectByExampleWithRowbounds(example,rowBounds);
+
+            // 添加到结果集中
+            result.addAll(batch);
+
+            // 判断是否还有更多数据
+            if (batch.size() < pageSize) {
+                hasMoreData = false;
+            } else {
+                offset += pageSize;
+            }
+        }
+        return result;
     }
 
     /**

@@ -7,6 +7,8 @@ import com.example.migration.dao.master.mapper.SpCashBalanceClosingAsAtMapper;
 import com.example.migration.dao.master.mapper.TTLMQOrdersMapper;
 import com.example.migration.dao.slave.entity.Vcbaccount;
 import com.example.migration.dao.slave.entity.VcbaccountExample;
+import com.example.migration.dao.slave.entity.Vcbtradingacc;
+import com.example.migration.dao.slave.entity.VcbtradingaccExample;
 import com.example.migration.dao.slave.mapper.ScdummyMapper;
 import com.example.migration.dao.slave.mapper.VcbaccountMapper;
 import com.example.migration.designPattern.ExportDifferentialStrategy;
@@ -18,6 +20,7 @@ import com.example.migration.pojo.export.req.CashExportReq;
 import com.example.migration.pojo.export.vo.CashBalanceSQLVo;
 import com.example.migration.pojo.export.vo.ExportTransferVo;
 import com.example.migration.pojo.export.vo.SpCashBalanceVo;
+import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -205,7 +208,7 @@ public class CashBalanceHandle implements ExportDifferentialStrategy {
      **/
     private List<ExportTransferVo> ttlDataCollectionProcess(List<ExportTransferVo> balanceVos,CashExportReq req) {
         List<ExportTransferVo> ttlList = new ArrayList<>();
-        List<Vcbaccount> vcbaccounts = vcbaccountMapper.selectByExample(null);
+        List<Vcbaccount> vcbaccounts = fetchVcbaccountPaginated();
 
         Map<String, BigDecimal> map = balanceVos.stream()
                 .collect(Collectors.toMap(
@@ -235,6 +238,36 @@ public class CashBalanceHandle implements ExportDifferentialStrategy {
             ttlList.add(vo);
         }
         return ttlList;
+    }
+
+    /**
+     * 分页查询 Vcbaccount 表数据，每次查询1000条并收集
+     * @return 所有 Vcbaccount 数据
+     */
+    private List<Vcbaccount> fetchVcbaccountPaginated() {
+        List<Vcbaccount> result = new ArrayList<>();
+        int pageSize = 1000;
+        int offset = 0;
+        boolean hasMoreData = true;
+
+        while (hasMoreData) {
+            // 构造分页查询条件
+            VcbaccountExample example = new VcbaccountExample();
+            RowBounds rowBounds = new RowBounds(offset * pageSize, pageSize);
+            // 执行查询
+            List<Vcbaccount> batch = vcbaccountMapper.selectByExampleWithRowbounds(example,rowBounds);
+
+            // 添加到结果集中
+            result.addAll(batch);
+
+            // 判断是否还有更多数据
+            if (batch.size() < pageSize) {
+                hasMoreData = false;
+            } else {
+                offset += pageSize;
+            }
+        }
+        return result;
     }
 
     /**
