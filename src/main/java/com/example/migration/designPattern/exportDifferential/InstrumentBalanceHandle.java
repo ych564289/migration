@@ -384,7 +384,7 @@ public class InstrumentBalanceHandle implements ExportDifferentialStrategy {
         // 过滤掉 clntCode 首字母为 C 的数据
         spInstrumentBalanceClosingAsAts = spInstrumentBalanceClosingAsAts.stream()
                 .filter(closingAsAt -> closingAsAt.getClntCode() == null ||
-                        !closingAsAt.getClntCode().startsWith("C"))
+                        !closingAsAt.getClntCode().startsWith("C") || !closingAsAt.getClntCode().startsWith("c"))
                 .peek(e -> {
                     if (e.getClntCode() != null) {
                         e.setClntCode(e.getClntCode().trim()); // 先 trim 再设置
