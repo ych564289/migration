@@ -2110,10 +2110,10 @@
     </if>
   </select>
     <select id="selectByExampleWithLimit" resultType="com.example.migration.dao.slave.entity.Vcbtradingacc">
+        SELECT clientid, instrumentid, marketid, tradingaccseq
+        FROM vcbtradingacc
+<!--        ORDER BY clientid OFFSET #{rowBounds.offset} ROWS FETCH NEXT #{rowBounds.limit} ROWS ONLY;-->
 
-      SELECT clientid, instrumentid, marketid, tradingaccseq
-      FROM vcbtradingacc
-             LIMIT #{rowBounds.limit} OFFSET #{rowBounds.offset}
 
     </select>
 </mapper>

@@ -71,5 +71,5 @@ public interface VcbtradingaccMapper {
      */
     int updateByExample(@Param("record") Vcbtradingacc record, @Param("example") VcbtradingaccExample example);
 
-    List<Vcbtradingacc> selectByExampleWithLimit(RowBounds rowBounds);
+    List<Vcbtradingacc> selectByExampleWithLimit();
 }

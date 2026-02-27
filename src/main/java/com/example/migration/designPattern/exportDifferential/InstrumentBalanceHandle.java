@@ -221,7 +221,8 @@ public class InstrumentBalanceHandle implements ExportDifferentialStrategy {
      **/
     private List<ExportTransferVo> ttlDataCollectionProcess(List<ExportTransferVo> balanceVos,CashExportReq req) {
         List<ExportTransferVo> ttlList = new ArrayList<>();
-        List<Vcbtradingacc> vcbtradingaccs = fetchVcbtradingaccPaginated();
+//        List<Vcbtradingacc> vcbtradingaccs = fetchVcbtradingaccPaginated();
+        List<Vcbtradingacc> vcbtradingaccs = vcbtradingaccMapper.selectByExampleWithLimit();
         Map<String, ExportTransferVo> voMap = balanceVos.stream()
                 .collect(Collectors.toMap(
                                 e -> e.getClntCode() + e.getInstrument() + e.getMarketId() + e.getAccounts(),
@@ -276,7 +277,7 @@ public class InstrumentBalanceHandle implements ExportDifferentialStrategy {
                 final int currentPage = page;
                 Callable<List<Vcbtradingacc>> task = () -> {
                     RowBounds rowBounds = new RowBounds(currentPage * pageSize, pageSize);
-                    return vcbtradingaccMapper.selectByExampleWithLimit(rowBounds);
+                    return vcbtradingaccMapper.selectByExampleWithLimit();
                 };
                 Future<List<Vcbtradingacc>> future = executorService.submit(task);
                 futures.add(future);
