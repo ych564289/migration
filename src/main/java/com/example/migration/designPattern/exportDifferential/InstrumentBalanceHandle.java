@@ -220,8 +220,24 @@ public class InstrumentBalanceHandle implements ExportDifferentialStrategy {
      **/
     private List<ExportTransferVo> ttlDataCollectionProcess(List<ExportTransferVo> balanceVos,CashExportReq req) {
         List<ExportTransferVo> ttlList = new ArrayList<>();
-        List<Vcbtradingacc> vcbtradingaccs = fetchVcbtradingaccInParallel(balanceVos, "1",req.getBalanceType());
+        List<Vcbtradingacc> vcbtradingaccs = vcbtradingaccMapper.selectByExample(null);
+        Map<String, ExportTransferVo> voMap = balanceVos.stream()
+                .collect(Collectors.toMap(
+                                e -> e.getClntCode() + e.getInstrument() + e.getMarketId() + e.getAccounts(),
+                                Function.identity(),
+                                (a, b) -> a
+                        )
+                );
+
+        List<Vcbtradingacc> vcbtradingaccList = new ArrayList<>();
         for (Vcbtradingacc vcbtradingacc : vcbtradingaccs) {
+            String key = vcbtradingacc.getClientid().trim() + vcbtradingacc.getInstrumentid().trim() + vcbtradingacc.getMarketid().trim() + vcbtradingacc.getTradingaccseq();
+            if (!voMap.containsKey(key)) {
+                vcbtradingaccList.add(vcbtradingacc);
+            }
+        }
+
+        for (Vcbtradingacc vcbtradingacc : vcbtradingaccList) {
             ExportTransferVo vo = new ExportTransferVo();
             vo.setClientid(vcbtradingacc.getClientid());
             vo.setInstrumentid(vcbtradingacc.getInstrumentid());
@@ -252,7 +268,7 @@ public class InstrumentBalanceHandle implements ExportDifferentialStrategy {
                                                  List<ExportTransferVo> abnormalList,
                                                  List<ExportTransferVo> exclusiveList,
                                                  CashExportReq req) {
-        List<Vcbtradingacc> vcbtradingaccs = fetchVcbtradingaccInParallel(balanceVos, null,req.getBalanceType());
+        List<Vcbtradingacc> vcbtradingaccs = fetchVcbtradingaccInParallel(balanceVos);
         Map<String, Vcbtradingacc> vcbtradingaccMap = vcbtradingaccs.stream()
                 .collect(Collectors.toMap(
                         e -> e.getClientid().trim() + e.getInstrumentid().trim() + e.getMarketid().trim() + e.getTradingaccseq(),
@@ -304,10 +320,9 @@ public class InstrumentBalanceHandle implements ExportDifferentialStrategy {
     /**
      * 获取Vcbtradingacc表数据 多线程处理
      * @param balanceVos
-     * @param clntCode 控制查询条件
      * @return
      */
-    private List<Vcbtradingacc> fetchVcbtradingaccInParallel(List<ExportTransferVo> balanceVos, String clntCode,BalancetypeEnum balanceType) {
+    private List<Vcbtradingacc> fetchVcbtradingaccInParallel(List<ExportTransferVo> balanceVos) {
         List<Vcbtradingacc> result = new ArrayList<>();
         int batchSize = 1000;
         int threadCount = Runtime.getRuntime().availableProcessors(); // 获取可用核心数作为线程数
@@ -339,31 +354,13 @@ public class InstrumentBalanceHandle implements ExportDifferentialStrategy {
                     .filter(Objects::nonNull)
                     .distinct()
                     .collect(Collectors.toList());
-            List<BigDecimal> balances = voList.stream()
-                    .map(ExportTransferVo::getBalance)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
             Callable<List<Vcbtradingacc>> task = () -> {
                 VcbtradingaccExample example = new VcbtradingaccExample();
                 VcbtradingaccExample.Criteria criteria = example.createCriteria();
-                if (clntCode != null) {
-                    criteria.andClientidNotIn(clientIds);
-                    criteria.andTradingaccseqNotIn(accountSeqs);
-                    criteria.andMarketidNotIn(marketIds);
-                    criteria.andInstrumentidNotIn(integers);
-                    if (balanceType.equals(BalancetypeEnum.L)) {
-                        criteria.andLedgerqtyNotIn(balances);
-                    }else if (balanceType.equals(BalancetypeEnum.D)) {
-                        criteria.andTmanualholdNotIn(balances);
-                    }else if (balanceType.equals(BalancetypeEnum.O)) {
-                        criteria.andTsettledNotIn(balances);
-                    }
-                }else {
-                    criteria.andClientidIn(clientIds);
-                    criteria.andTradingaccseqIn(accountSeqs);
-                    criteria.andMarketidIn(marketIds);
-                    criteria.andInstrumentidIn(integers);
-                }
+                criteria.andClientidIn(clientIds);
+                criteria.andTradingaccseqIn(accountSeqs);
+                criteria.andMarketidIn(marketIds);
+                criteria.andInstrumentidIn(integers);
                 return vcbtradingaccMapper.selectByExample(example);
             };
             Future<List<Vcbtradingacc>> future = executorService.submit(task);
@@ -428,10 +425,10 @@ public class InstrumentBalanceHandle implements ExportDifferentialStrategy {
                                     SpInstrumentBalanceClosingAsAt closingAsAt = instrumentEntry.getValue().get(0);
                                     if (closingAsAt != null) {
                                         ExportTransferVo vo = new ExportTransferVo();
-                                        vo.setClntCode(closingAsAt.getClntCode());
-                                        vo.setAccounts(closingAsAt.getAccounts());
-                                        vo.setMarketId(closingAsAt.getTtlMarketID());
-                                        vo.setInstrument(closingAsAt.getInstrument());
+                                        vo.setClntCode(closingAsAt.getClntCode().trim());
+                                        vo.setAccounts(closingAsAt.getAccounts().trim());
+                                        vo.setMarketId(closingAsAt.getTtlMarketID().trim());
+                                        vo.setInstrument(closingAsAt.getInstrument().trim());
                                         vo.setBalance(instrumentEntry.getValue().stream()
                                                 .map(SpInstrumentBalanceClosingAsAt::getAsAt)
                                                 .filter(Objects::nonNull) // 过滤空值

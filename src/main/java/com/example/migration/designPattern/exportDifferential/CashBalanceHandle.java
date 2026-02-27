@@ -21,6 +21,7 @@ import com.example.migration.pojo.export.vo.SpCashBalanceVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.awt.image.Kernel;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.*;
@@ -204,9 +205,22 @@ public class CashBalanceHandle implements ExportDifferentialStrategy {
      **/
     private List<ExportTransferVo> ttlDataCollectionProcess(List<ExportTransferVo> balanceVos,CashExportReq req) {
         List<ExportTransferVo> ttlList = new ArrayList<>();
-        List<Vcbaccount> vcbaccounts = fetchVcbaccountsInParallel(balanceVos,"1",req.getBalanceType());
+        List<Vcbaccount> vcbaccounts = vcbaccountMapper.selectByExample(null);
 
+        Map<String, BigDecimal> map = balanceVos.stream()
+                .collect(Collectors.toMap(
+                        e -> e.getClntCode().trim() + e.getAccounts().trim() + e.getCcy(),
+                        ExportTransferVo::getBalance,
+                        (a, b) -> a
+                ));
+        List<Vcbaccount> vcb = new ArrayList<>();
         for (Vcbaccount vcbaccount : vcbaccounts) {
+            String key = vcbaccount.getClientid().trim() + vcbaccount.getAccountseq() + vcbaccount.getCurrencyid().trim();
+            if (!map.containsKey(key)) {
+                vcb.add(vcbaccount);
+            }
+        }
+        for (Vcbaccount vcbaccount : vcb) {
             ExportTransferVo vo = new ExportTransferVo();
             vo.setTtlClientid(vcbaccount.getClientid());
             vo.setTtlCurrencyid(vcbaccount.getCurrencyid());
@@ -237,7 +251,7 @@ public class CashBalanceHandle implements ExportDifferentialStrategy {
                                                      List<ExportTransferVo> exclusiveList,
                                                      CashExportReq req) {
 
-        List<Vcbaccount> vcbaccounts = fetchVcbaccountsInParallel(balanceVos, null,req.getBalanceType());
+        List<Vcbaccount> vcbaccounts = fetchVcbaccountsInParallel(balanceVos);
         Map<String, Vcbaccount> decimalMap = vcbaccounts.stream()
                 .collect(Collectors.toMap(
                         e -> e.getClientid().trim() + e.getAccountseq() + e.getCurrencyid().trim(),
@@ -411,10 +425,9 @@ public class CashBalanceHandle implements ExportDifferentialStrategy {
     /**
      * 获取vcbaccount表数据 多线程处理
      * @param balanceVos
-     * @param clntCode 控制查询条件
      * @return
      */
-    private List<Vcbaccount> fetchVcbaccountsInParallel(List<ExportTransferVo> balanceVos,String clntCode,BalancetypeEnum balanceType) {
+    private List<Vcbaccount> fetchVcbaccountsInParallel(List<ExportTransferVo> balanceVos) {
         List<Vcbaccount> result = new ArrayList<>();
 
         int batchSize = 1000;
@@ -446,30 +459,12 @@ public class CashBalanceHandle implements ExportDifferentialStrategy {
                     .distinct()
                     .collect(Collectors.toList());
 
-            List<BigDecimal> balances = voList.stream()
-                    .map(ExportTransferVo::getBalance)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-
             Callable<List<Vcbaccount>> task = () -> {
                 VcbaccountExample example = new VcbaccountExample();
                 VcbaccountExample.Criteria criteria = example.createCriteria();
-                if (clntCode != null) {
-                    criteria.andClientidNotIn(batchClientIds);
-                    criteria.andAccountseqNotIn(accountSeqs);
-                    criteria.andCurrencyidNotIn(currencyIds);
-                    if (balanceType.equals(BalancetypeEnum.L)) {
-                        criteria.andLedgerbalNotIn(balances);
-                    }else if (balanceType.equals(BalancetypeEnum.D)) {
-                        criteria.andCmanualholdNotIn(balances);
-                    }else if (balanceType.equals(BalancetypeEnum.O)) {
-                        criteria.andCsettledNotIn(balances);
-                    }
-                }else {
-                    criteria.andClientidIn(batchClientIds);
-                    criteria.andAccountseqIn(accountSeqs);
-                    criteria.andCurrencyidIn(currencyIds);
-                }
+                criteria.andClientidIn(batchClientIds);
+                criteria.andAccountseqIn(accountSeqs);
+                criteria.andCurrencyidIn(currencyIds);
                 return vcbaccountMapper.selectByExample(example);
             };
 
