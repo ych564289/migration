@@ -10,6 +10,7 @@ import com.example.migration.pojo.logMigration.req.MigrationReq;
 import com.example.migration.service.InstrumentExtVersionService;
 import com.example.migration.service.InstrumentVersionService;
 import com.example.migration.service.LogRecordMigrationService;
+import com.example.migration.util.CaseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -90,7 +91,7 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
                 // 构建字段映射
                 Map<String, String> fieldMap = groupList.stream()
                         .filter(e -> e.getAftervalue() != null)
-                        .collect(Collectors.toMap(GenericLog::getLogcolumn, GenericLog::getAftervalue, (e1, e2) -> e1));
+                        .collect(Collectors.toMap(e -> CaseUtil.toLowerCamelCase(e.getLogcolumn()), GenericLog::getAftervalue, (e1, e2) -> e1));
 
                 GenericLog log = groupList.get(0);
                 T entity;
