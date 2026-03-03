@@ -89,7 +89,7 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
 
                 // 构建字段映射
                 Map<String, String> fieldMap = groupList.stream()
-                        .filter(e -> e.getAftervalue() == null)
+                        .filter(e -> e.getAftervalue() != null)
                         .collect(Collectors.toMap(GenericLog::getLogcolumn, GenericLog::getAftervalue, (e1, e2) -> e1));
 
                 GenericLog log = groupList.get(0);
