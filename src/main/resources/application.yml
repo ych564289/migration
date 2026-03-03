@@ -13,7 +13,7 @@ spring:
       username: pleung
       password: 123456
       hikari:
-        maximum-pool-size: 15
+        maximum-pool-size: 20
         minimum-idle: 5
     slave:
       driver-class-name: com.ibm.db2.jcc.DB2Driver
@@ -22,7 +22,7 @@ spring:
       username: winvest
       password: PQ22wor6
       hikari:
-        maximum-pool-size: 15
+        maximum-pool-size: 20
         minimum-idle: 5
 
 mybatis:
