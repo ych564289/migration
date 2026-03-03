@@ -1,6 +1,7 @@
 package com.example.migration.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.example.migration.dao.master.entity.GenericLog;
 import com.example.migration.dao.master.entity.InstrumentExtVersion;
 import com.example.migration.dao.master.entity.InstrumentVersion;
@@ -33,7 +34,7 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
     private GenericLogMapper genericLogMapper;
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class,value = "masterTransactionManager")
     public String migration(MigrationReq req) {
         String tableName = req.getTableName();
         Date currentDate = new Date();
@@ -71,6 +72,7 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
     private <T> void processMigration(List<GenericLog> logList, Date currentDate, MigrationContext context, boolean isInsert) {
         // 按 key 和时间分组
         Map<String, Map<Date, List<GenericLog>>> groupedMap = logList.stream()
+                .filter(e -> ObjectUtil.isNotEmpty(e.getTablekey1()))
                 .collect(Collectors.groupingBy(
                         GenericLog::getTablekey1,
                         Collectors.groupingBy(GenericLog::getLogdatetime)

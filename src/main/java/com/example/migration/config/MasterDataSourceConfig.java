@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 
@@ -38,6 +39,11 @@ public class MasterDataSourceConfig {
     @Bean
     public DataSourceTransactionManager masterTransactionManager(
             @Qualifier("masterDataSource") DataSource dataSource) {
+        return new DataSourceTransactionManager(dataSource);
+    }
+
+    @Bean(name = "midDataSourceTransactionManager")
+    public PlatformTransactionManager midDataSourceTransactionManager(@Qualifier("masterDataSource") DataSource dataSource) {
         return new DataSourceTransactionManager(dataSource);
     }
 }
