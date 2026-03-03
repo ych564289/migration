@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Supplier;
@@ -239,8 +240,26 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
         } else if (fieldType == BigDecimal.class) {
             return new BigDecimal(strVal);
         } else if (fieldType == Date.class) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd yyyy hh:mm a", Locale.ENGLISH);
-            return dateFormat.parse(strVal);
+            // 定义可能的日期格式数组
+            String[] datePatterns = {
+                    "dd MMM yyyy",       // 匹配 "20 Aug 2035"
+                    "MMM dd yyyy hh:mm a", // 匹配 "Oct 21 2025 10:54 AM"
+                    "yyyy-MM-dd",        // 匹配 "2025-08-20"
+                    "yyyy/MM/dd",        // 匹配 "2025/08/20"
+                    "dd/MM/yyyy"         // 匹配 "20/08/2035"
+            };
+
+            for (String pattern : datePatterns) {
+                try {
+                    SimpleDateFormat dateFormat = new SimpleDateFormat(pattern, Locale.ENGLISH);
+                    dateFormat.setLenient(false); // 严格匹配
+                    return dateFormat.parse(strVal);
+                } catch (ParseException e) {
+                    // 尝试下一个格式
+                }
+            }
+            // 如果所有格式都失败，抛出异常
+            throw new ParseException("Unable to parse date: " + strVal + " with any known format", 0);
         } else if (fieldType == Integer.class || fieldType == int.class) {
             return Integer.parseInt(strVal);
         } else if (fieldType == Long.class || fieldType == long.class) {

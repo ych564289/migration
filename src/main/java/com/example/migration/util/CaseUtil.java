@@ -1,5 +1,9 @@
 package com.example.migration.util;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
+
 public class CaseUtil {
 
     /**
@@ -61,5 +65,13 @@ public class CaseUtil {
         System.out.println(toLowerCamelCase(input3)); // 输出: customerData
 
         System.out.println(toUpperCamelCase(input1)); // 输出: UserInfoList
+
+        String date = "20 Aug 2035";
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH);
+        try {
+            System.out.println(dateFormat.parse(date));;
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
