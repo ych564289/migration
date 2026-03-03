@@ -175,35 +175,37 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
     // --- 原有的初始化逻辑保持不变，仅调整泛型签名以适配函数式接口 ---
 
     private InstrumentVersion initInstrumentVersionHandle(String tablekey1, List<InstrumentVersion> currentList, List<InstrumentVersion> baseList) {
+        InstrumentVersion version = null;
         if (CollectionUtil.isNotEmpty(currentList)) {
-            return currentList.stream()
+            version = currentList.stream()
                     .filter(i -> tablekey1.equals(i.getInstrument()))
                     .max(Comparator.comparing(InstrumentVersion::getLogdatetime, Comparator.nullsLast(Comparator.naturalOrder())))
                     .orElse(null);
         }
-        if (CollectionUtil.isNotEmpty(baseList)) {
-            return baseList.stream()
+        if (version == null && CollectionUtil.isNotEmpty(baseList)) {
+            version = baseList.stream()
                     .filter(i -> tablekey1.equals(i.getInstrument()))
                     .findFirst()
                     .orElse(null);
         }
-        return null;
+        return version;
     }
 
     private InstrumentExtVersion initInstrumentExtVersionHandle(String tablekey1, List<InstrumentExtVersion> currentList, List<InstrumentExtVersion> baseList) {
+        InstrumentExtVersion extVersion = null;
         if (CollectionUtil.isNotEmpty(currentList)) {
-            return currentList.stream()
+            extVersion = currentList.stream()
                     .filter(i -> tablekey1.equals(i.getInstrument()))
                     .max(Comparator.comparing(InstrumentExtVersion::getLogdatetime, Comparator.nullsLast(Comparator.naturalOrder())))
                     .orElse(null);
         }
-        if (CollectionUtil.isNotEmpty(baseList)) {
-            return baseList.stream()
+        if (extVersion == null && CollectionUtil.isNotEmpty(baseList)) {
+            extVersion = baseList.stream()
                     .filter(i -> tablekey1.equals(i.getInstrument()))
                     .findFirst()
                     .orElse(null);
         }
-        return null;
+        return extVersion;
     }
 
     /**
