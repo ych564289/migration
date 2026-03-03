@@ -3,8 +3,6 @@ package com.example.migration.service.impl;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
 import com.alibaba.excel.write.metadata.WriteSheet;
-import com.example.migration.dao.master.entity.SpCashBalanceClosingAsAt;
-import com.example.migration.dao.master.mapper.SpCashBalanceClosingAsAtMapper;
 import com.example.migration.designPattern.exportDifferential.ExportDifferencePattern;
 import com.example.migration.enumeration.export.DataSourceTypeEnum;
 import com.example.migration.pojo.export.req.CashExportReq;
@@ -18,9 +16,7 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;

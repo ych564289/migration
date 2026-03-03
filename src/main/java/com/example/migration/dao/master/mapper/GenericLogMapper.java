@@ -134,4 +134,12 @@ public interface GenericLogMapper {
      * @mbg.generated
      */
     int updateByPrimaryKey(GenericLog record);
+
+    List<GenericLog> queryInstrumentVersionInsert();
+
+    List<GenericLog> queryInstrumentVersionUpdate();
+
+    List<GenericLog> queryInstrumentExtVersionInsert();
+
+    List<GenericLog> queryInstrumentExtVersionUpdate();
 }

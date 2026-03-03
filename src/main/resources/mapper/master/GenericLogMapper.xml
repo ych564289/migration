@@ -599,4 +599,24 @@
       order by ${orderByClause}
     </if>
   </select>
+    <select id="queryInstrumentVersionInsert" resultType="com.example.migration.dao.master.entity.GenericLog">
+        select <include refid="Base_Column_List" />
+            from GenericLog
+        where LogTable = 'Instrument' and LogAction = 'INSERT'
+    </select>
+  <select id="queryInstrumentVersionUpdate" resultType="com.example.migration.dao.master.entity.GenericLog">
+    select <include refid="Base_Column_List" />
+    from GenericLog
+    where LogTable = 'Instrument' and LogAction = 'UPDATE'
+  </select>
+  <select id="queryInstrumentExtVersionInsert" resultType="com.example.migration.dao.master.entity.GenericLog">
+    select <include refid="Base_Column_List" />
+    from GenericLog
+    where LogTable = 'InstrumentExt' and LogAction = 'INSERT'
+  </select>
+  <select id="queryInstrumentExtVersionUpdate" resultType="com.example.migration.dao.master.entity.GenericLog">
+    select <include refid="Base_Column_List" />
+    from GenericLog
+    where LogTable = 'InstrumentExt' and LogAction = 'UPDATE'
+  </select>
 </mapper>
