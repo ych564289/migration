@@ -12,6 +12,7 @@ import com.example.migration.service.InstrumentExtVersionService;
 import com.example.migration.service.InstrumentVersionService;
 import com.example.migration.service.LogRecordMigrationService;
 import com.example.migration.util.CaseUtil;
+import com.alibaba.excel.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,7 +59,7 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
         }
 
         // 处理插入数据
-        List<String> keys = context.insertQueryGroup.get().stream().filter(key -> key != null && !key.isEmpty()).collect(Collectors.toList());
+        List<String> keys = context.insertQueryGroup.get().stream().filter(StringUtils::isEmpty).collect(Collectors.toList());
         int threadCount = Runtime.getRuntime().availableProcessors();
 
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
@@ -94,7 +95,7 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
         ExecutorService executorUpd = Executors.newFixedThreadPool(threadCount);
         List<CompletableFuture<Void>> futuresUpd = new ArrayList<>();
 
-        List<String> updKeys = context.updateQueryGroup.get().stream().filter(key -> key != null && !key.isEmpty()).collect(Collectors.toList());
+        List<String> updKeys = context.updateQueryGroup.get().stream().filter(StringUtils::isEmpty).collect(Collectors.toList());
         int updBatch = 1000;
         try {
             for (int i = 0; i < updKeys.size(); i += updBatch) {
