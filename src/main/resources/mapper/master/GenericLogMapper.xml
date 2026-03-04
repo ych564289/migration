@@ -637,7 +637,7 @@
     where LogTable = 'Instrument' and LogAction = 'INSERT' group by tableKey1
   </select>
   <select id="queryInstrumentVersionUpdateGruopKey"
-          resultType="com.example.migration.dao.master.entity.GenericLog">
+          resultType="java.lang.String">
     select tableKey1
     from GenericLog
     where LogTable = 'Instrument' and LogAction = 'UPDATE' group by tableKey1
@@ -649,7 +649,7 @@
     where LogTable = 'InstrumentExt' and LogAction = 'INSERT' group by tableKey1
   </select>
   <select id="queryInstrumentVersionExtUpdateGruopKey"
-          resultType="com.example.migration.dao.master.entity.GenericLog">
+          resultType="java.lang.String">
     select tableKey1
     from GenericLog
     where LogTable = 'InstrumentExt' and LogAction = 'UPDATE' group by tableKey1
