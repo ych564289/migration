@@ -6,6 +6,7 @@ import com.example.migration.dao.master.mapper.InstrumentExtVersionMapper;
 import com.example.migration.service.InstrumentExtVersionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 
@@ -16,6 +17,7 @@ public class InstrumentExtVersionServiceImpl extends ServiceImpl<InstrumentExtVe
     private InstrumentExtVersionMapper instrumentExtVersionMapper;
 
     @Override
+    @Transactional(rollbackFor = Exception.class,value = "masterTransactionManager")
     public boolean saveBatch(Collection<InstrumentExtVersion> entityList) {
         return instrumentExtVersionMapper.saveBatch(entityList);
     }
