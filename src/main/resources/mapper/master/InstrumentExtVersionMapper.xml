@@ -481,7 +481,7 @@
       #{item.lastcoupondate}, #{item.nextcoupondate}, #{item.fundhouse},
       #{item.totalissuedshares}, #{item.instrumentsection}, #{item.couponperiod},
       #{item.rateperiod}, #{item.convertinstrument}, #{item.convertmarket},
-      #{item.convertdepot}, #{item.convertlocation}, #{item.confirmDays},#{item.settledays},
+      #{item.convertdepot}, #{item.convertlocation}, #{item.confirmdays},#{item.settledays},
        #{item.elitype}, #{item.issueprice}, #{item.strikeprice}, #{item.strikepriceupper}, #{item.settlemode},
        #{item.instsettledate}, #{item.issuer}, #{item.unitrounding},#{item.roundingtype},#{item.fundhousefee},
        #{item.additionalfee}, #{item.minredemptedamount}, #{item.minremainingamount}, #{item.shorttradedays}, #{item.syncref},

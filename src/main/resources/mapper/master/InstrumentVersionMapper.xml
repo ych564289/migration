@@ -690,7 +690,7 @@
         #{item.transactionqtylimit}, #{item.dailyvaluelimit}, #{item.dailyqtylimit},
         #{item.expirydate}, #{item.active}, #{item.marginpercent},
         #{item.series}, #{item.pricecap}, #{item.calculationprice},
-        #{item.suspended}, #{item.tradingccy}, #{item.exchangeCode}, #{item.exchangeInternalCode}, #{item.bloomberg},
+        #{item.suspended}, #{item.tradingccy}, #{item.exchangecode}, #{item.exchangeInternalcode}, #{item.bloomberg},
          #{item.reuters}, #{item.isin}, #{item.sedol}, #{item.firstdealingdate},#{item.lastdealingdate},
           #{item.electronicclearing}, #{item.shortsell}, #{item.parvalue}, #{item.fee1}, #{item.fee2}, #{item.fee3}, #{item.fee4},
           #{item.fee5}, #{item.fee6}, #{item.fee7}, #{item.fee8}, #{item.fee9}, #{item.fee10},#{item.category}, #{item.spreadtablecode},
