@@ -320,6 +320,10 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
         } else if (fieldType == BigDecimal.class) {
             return new BigDecimal(strVal);
         } else if (fieldType == Date.class) {
+            strVal = strVal.replaceAll("\\s+", " ");
+            // 2. 在时间和 AM/PM 之间添加空格 (解决 "10:58AM" 问题)
+            // 正则解释：查找数字后紧跟 AM 或 PM 的情况，并在中间插入空格
+            strVal = strVal.replaceAll("(\\d)([AaPp][Mm])", "$1 $2");
             // 定义可能的日期格式数组
             String[] datePatterns = {
                     "MMM dd yyyy h:mm a",   // 【新增】匹配 "Sep 17 2025 9:05 PM"
