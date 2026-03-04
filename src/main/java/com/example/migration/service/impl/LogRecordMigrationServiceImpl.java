@@ -322,6 +322,7 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
         } else if (fieldType == Date.class) {
             // 定义可能的日期格式数组
             String[] datePatterns = {
+                    "MMM dd yyyy h:mm a",   // 【新增】匹配 "Sep 17 2025 9:05 PM"
                     "dd MMM yyyy",       // 匹配 "20 Aug 2035"
                     "MMM dd yyyy hh:mm a", // 匹配 "Oct 21 2025 10:54 AM"
                     "yyyy-MM-dd",        // 匹配 "2025-08-20"
