@@ -3,6 +3,8 @@ package com.example.migration.dao.master.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.example.migration.dao.master.entity.InstrumentExtVersion;
 import com.example.migration.dao.master.entity.InstrumentExtVersionExample;
+
+import java.util.Collection;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.session.RowBounds;
@@ -71,4 +73,6 @@ public interface InstrumentExtVersionMapper extends BaseMapper<InstrumentExtVers
      * @mbg.generated
      */
     int updateByExample(@Param("record") InstrumentExtVersion record, @Param("example") InstrumentExtVersionExample example);
+
+    boolean saveBatch(Collection<InstrumentExtVersion> entityList);
 }
