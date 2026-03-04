@@ -59,7 +59,7 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
         }
 
         // 处理插入数据
-        List<String> keys = context.insertQueryGroup.get().stream().filter(StringUtils::isEmpty).collect(Collectors.toList());
+        List<String> keys = context.insertQueryGroup.get().stream().filter(StringUtils::isNotBlank).collect(Collectors.toList());
         int threadCount = Runtime.getRuntime().availableProcessors();
 
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
@@ -95,7 +95,7 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
         ExecutorService executorUpd = Executors.newFixedThreadPool(threadCount);
         List<CompletableFuture<Void>> futuresUpd = new ArrayList<>();
 
-        List<String> updKeys = context.updateQueryGroup.get().stream().filter(StringUtils::isEmpty).collect(Collectors.toList());
+        List<String> updKeys = context.updateQueryGroup.get().stream().filter(StringUtils::isNotBlank).collect(Collectors.toList());
         int updBatch = 1000;
         try {
             for (int i = 0; i < updKeys.size(); i += updBatch) {
