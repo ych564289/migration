@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Service
 public class InstrumentVersionServiceImpl extends ServiceImpl<InstrumentVersionMapper, InstrumentVersion> implements InstrumentVersionService{
@@ -19,6 +21,23 @@ public class InstrumentVersionServiceImpl extends ServiceImpl<InstrumentVersionM
     @Override
     @Transactional(rollbackFor = Exception.class,value = "masterTransactionManager")
     public boolean saveBatch(Collection<InstrumentVersion> entityList) {
-        return instrumentVersionMapper.saveBatch(entityList);
+        if (entityList == null || entityList.isEmpty()) {
+            return true;
+        }
+
+        int batchSize = 1000;
+        // 将 Collection 转换为 List 以便进行子列表操作
+        List<InstrumentVersion> list = new ArrayList<>(entityList);
+
+        for (int i = 0; i < list.size(); i += batchSize) {
+            int end = Math.min(i + batchSize, list.size());
+            List<InstrumentVersion> subList = list.subList(i, end);
+
+            boolean success = instrumentVersionMapper.saveBatch(subList);
+            if (!success) {
+                return false;
+            }
+        }
+        return true;
     }
 }
