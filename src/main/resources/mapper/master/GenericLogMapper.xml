@@ -602,22 +602,34 @@
     <select id="queryInstrumentVersionInsert" resultType="com.example.migration.dao.master.entity.GenericLog">
         select <include refid="Base_Column_List" />
             from GenericLog
-        where LogTable = 'Instrument' and LogAction = 'INSERT'
+        where LogTable = 'Instrument' and LogAction = 'INSERT' and TableKey1 in
+        <foreach item="item" index="index" collection="tableKeys" open="(" separator="," close=")">
+            #{item}
+        </foreach>
     </select>
   <select id="queryInstrumentVersionUpdate" resultType="com.example.migration.dao.master.entity.GenericLog">
     select <include refid="Base_Column_List" />
     from GenericLog
-    where LogTable = 'Instrument' and LogAction = 'UPDATE'
+    where LogTable = 'Instrument' and LogAction = 'UPDATE' and ableKey1 in
+    <foreach item="item" index="index" collection="tableKeys" open="(" separator="," close=")">
+      #{item}
+    </foreach>
   </select>
   <select id="queryInstrumentExtVersionInsert" resultType="com.example.migration.dao.master.entity.GenericLog">
     select <include refid="Base_Column_List" />
     from GenericLog
-    where LogTable = 'InstrumentExt' and LogAction = 'INSERT'
+    where LogTable = 'InstrumentExt' and LogAction = 'INSERT' and ableKey1 in
+    <foreach item="item" index="index" collection="tableKeys" open="(" separator="," close=")">
+      #{item}
+    </foreach>
   </select>
   <select id="queryInstrumentExtVersionUpdate" resultType="com.example.migration.dao.master.entity.GenericLog">
     select <include refid="Base_Column_List" />
     from GenericLog
-    where LogTable = 'InstrumentExt' and LogAction = 'UPDATE'
+    where LogTable = 'InstrumentExt' and LogAction = 'UPDATE' and ableKey1 in
+    <foreach item="item" index="index" collection="tableKeys" open="(" separator="," close=")">
+      #{item}
+    </foreach>
   </select>
   <select id="queryInstrumentVersionInsertGruopKey" resultType="java.lang.String">
     select tableKey1
