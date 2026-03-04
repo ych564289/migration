@@ -1,6 +1,7 @@
 package com.example.migration.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.example.migration.dao.master.entity.GenericLog;
 import com.example.migration.dao.master.entity.InstrumentExtVersion;
@@ -20,6 +21,11 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -35,8 +41,12 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
     @Autowired
     private GenericLogMapper genericLogMapper;
 
+    private List<String> errorInsertLogs = Collections.synchronizedList(new ArrayList<>());
+
+    private List<String> errorUpdateLogs = Collections.synchronizedList(new ArrayList<>());
+
     @Override
-    @Transactional(rollbackFor = Exception.class,value = "masterTransactionManager")
+    //@Transactional(rollbackFor = Exception.class,value = "masterTransactionManager")
     public String migration(MigrationReq req) {
         String tableName = req.getTableName();
         Date currentDate = new Date();
@@ -48,17 +58,76 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
         }
 
         // 处理插入数据
-        List<GenericLog> insertList = context.insertQuery.get();
-        if (CollectionUtil.isNotEmpty(insertList)) {
-            processMigration(insertList, currentDate, context, true);
+        List<String> keys = context.insertQueryGroup.get();
+        int threadCount = Runtime.getRuntime().availableProcessors();
+
+        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+        int batch = 1000;
+        try {
+            for (int i = 0; i < keys.size(); i += batch) {
+                int end = Math.min(i + batch, keys.size());
+                List<String> subList = keys.subList(i, end);
+                CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                    // 执行具体的查询和处理逻辑
+                    List<GenericLog> insertList = context.insertQuery.apply(subList);
+                    if (CollectionUtil.isNotEmpty(insertList)) {
+                        processMigration(insertList, currentDate, context, true);
+                    }
+                }, executor);
+                futures.add(future);
+            }
+            // 阻塞主线程，直到所有批次任务完成
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+        }finally {
+            executor.shutdown();
+            try {
+                if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
+                    executor.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                executor.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
         }
 
-        // 处理更新数据
-        List<GenericLog> updateList = context.updateQuery.get();
-        if (CollectionUtil.isNotEmpty(updateList)) {
-            processMigration(updateList, currentDate, context, false);
-        }
+        ExecutorService executorUpd = Executors.newFixedThreadPool(threadCount);
+        List<CompletableFuture<Void>> futuresUpd = new ArrayList<>();
 
+        List<String> updKeys = context.updateQueryGroup.get();
+        int updBatch = 1000;
+        try {
+            for (int i = 0; i < updKeys.size(); i += updBatch) {
+                int end = Math.min(i + updBatch, updKeys.size());
+                List<String> subList = updKeys.subList(i, end);
+                CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
+                    List<GenericLog> updateList = context.updateQuery.apply(subList);
+                    if (CollectionUtil.isNotEmpty(updateList)) {
+                        processMigration(updateList, currentDate, context, false);
+                    }
+                    }, executorUpd);
+                futuresUpd.add(future);
+            }
+            // 阻塞主线程，直到所有批次任务完成
+            CompletableFuture.allOf(futuresUpd.toArray(new CompletableFuture[0])).join();
+        } finally {
+            executorUpd.shutdown();
+            try {
+                if (!executorUpd.awaitTermination(60, TimeUnit.SECONDS)) {
+                    executorUpd.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                executorUpd.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        }
+        // 记录文件
+        if (CollectionUtil.isNotEmpty(errorInsertLogs)) {
+            FileUtil.writeUtf8Lines(errorInsertLogs,tableName + "_errorInsertLogs.txt");
+        }
+        if (CollectionUtil.isNotEmpty(errorUpdateLogs)) {
+            FileUtil.writeUtf8Lines(errorUpdateLogs, tableName + "_errorUpdateLogs.txt");
+        }
         return "success";
     }
 
@@ -114,7 +183,13 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
                     populateInstrumentVersion(entity, fieldMap);
                     resultList.add(entity);
                 } catch (Exception e) {
-                    throw new RuntimeException("Failed to populate entity for key: " + log.getTablekey1(), e);
+                    e.printStackTrace();
+                    List<String> keys = logList.stream().map(GenericLog::getTablekey1).distinct().collect(Collectors.toList());
+                    if (isInsert) {
+                        errorInsertLogs.addAll(keys);
+                    }else {
+                        errorUpdateLogs.addAll(keys);
+                    }
                 }
             }
         }
@@ -124,7 +199,7 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
             //context.saver.accept(resultList);
             // 如果是 Insert 阶段，将结果存入上下文供 Update 阶段使用
             if (isInsert) {
-                context.currentResultList = resultList;
+                context.currentResultList.addAll(resultList);
             }
         }
     }
@@ -155,16 +230,20 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
     private MigrationContext getMigrationContext(String tableName) {
         if ("Instrument".equals(tableName)) {
             return new MigrationContext(
-                    () -> genericLogMapper.queryInstrumentVersionInsert(),
-                    () -> genericLogMapper.queryInstrumentVersionUpdate(),
+                    (keys) -> genericLogMapper.queryInstrumentVersionInsert(keys),
+                    (keys) -> genericLogMapper.queryInstrumentVersionUpdate(keys),
+                    () -> genericLogMapper.queryInstrumentVersionInsertGruopKey(),
+                    () -> genericLogMapper.queryInstrumentVersionUpdateGruopKey(),
                     InstrumentVersion::new,
                     (tablekey1, resultList, baseList) -> initInstrumentVersionHandle(tablekey1, (List<InstrumentVersion>) resultList, (List<InstrumentVersion>) baseList),
                     (list) -> instrumentVersionService.saveBatch((List<InstrumentVersion>) list)
             );
         } else if ("InstrumentExt".equals(tableName)) {
             return new MigrationContext(
-                    () -> genericLogMapper.queryInstrumentExtVersionInsert(),
-                    () -> genericLogMapper.queryInstrumentExtVersionUpdate(),
+                    (keys) -> genericLogMapper.queryInstrumentExtVersionInsert(keys),
+                    (keys) -> genericLogMapper.queryInstrumentExtVersionUpdate(keys),
+                    () -> genericLogMapper.queryInstrumentVersionExtInsertGruopKey(),
+                    () -> genericLogMapper.queryInstrumentVersionExtUpdateGruopKey(),
                     InstrumentExtVersion::new,
                     (tablekey1, resultList, baseList) -> initInstrumentExtVersionHandle(tablekey1, (List<InstrumentExtVersion>) resultList, (List<InstrumentExtVersion>) baseList),
                     (list) -> instrumentExtVersionService.saveBatch((List<InstrumentExtVersion>) list)
@@ -277,22 +356,29 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
      * 迁移上下文配置记录
      */
     private static class MigrationContext {
-        final Supplier<List<GenericLog>> insertQuery;
-        final Supplier<List<GenericLog>> updateQuery;
+        final Function<List<String>,List<GenericLog>> insertQuery;
+        final Function<List<String>,List<GenericLog>> updateQuery;
+
+        final Supplier<List<String>> insertQueryGroup;
+        final Supplier<List<String>> updateQueryGroup;
         final Supplier<Object> creator;
         final TriFunction<String, List<?>, List<?>, Object> initializer;
         final java.util.function.Consumer<List<?>> saver;
 
         // 用于在 Insert 和 Update 步骤间传递已处理的数据
-        List<?> currentResultList;
+        List<Object> currentResultList = Collections.synchronizedList(new ArrayList<>());
 
-        public MigrationContext(Supplier<List<GenericLog>> insertQuery,
-                                Supplier<List<GenericLog>> updateQuery,
+        public MigrationContext(Function<List<String>,List<GenericLog>> insertQuery,
+                                Function<List<String>,List<GenericLog>> updateQuery,
+                                Supplier<List<String>> insertQueryGroup,
+                                Supplier<List<String>> updateQueryGroup,
                                 Supplier<?> creator,
                                 TriFunction<String, List<?>, List<?>, ?> initializer,
                                 java.util.function.Consumer<List<?>> saver) {
             this.insertQuery = insertQuery;
             this.updateQuery = updateQuery;
+            this.insertQueryGroup = insertQueryGroup;
+            this.updateQueryGroup = updateQueryGroup;
             this.creator = (Supplier<Object>) creator;
             this.initializer = (TriFunction<String, List<?>, List<?>, Object>) initializer;
             this.saver = saver;

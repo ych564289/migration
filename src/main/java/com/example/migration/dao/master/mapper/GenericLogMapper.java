@@ -135,11 +135,19 @@ public interface GenericLogMapper {
      */
     int updateByPrimaryKey(GenericLog record);
 
-    List<GenericLog> queryInstrumentVersionInsert();
+    List<GenericLog> queryInstrumentVersionInsert(@Param("tableKeys") List<String> tableKeys);
 
-    List<GenericLog> queryInstrumentVersionUpdate();
+    List<GenericLog> queryInstrumentVersionUpdate(@Param("tableKeys") List<String> tableKeys);
 
-    List<GenericLog> queryInstrumentExtVersionInsert();
+    List<GenericLog> queryInstrumentExtVersionInsert(@Param("tableKeys") List<String> tableKeys);
 
-    List<GenericLog> queryInstrumentExtVersionUpdate();
+    List<GenericLog> queryInstrumentExtVersionUpdate(@Param("tableKeys") List<String> tableKeys);
+
+    List<String> queryInstrumentVersionInsertGruopKey();
+
+    List<String> queryInstrumentVersionUpdateGruopKey();
+
+    List<String> queryInstrumentVersionExtInsertGruopKey();
+
+    List<String> queryInstrumentVersionExtUpdateGruopKey();
 }
