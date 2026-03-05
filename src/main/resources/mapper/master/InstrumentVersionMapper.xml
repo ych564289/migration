@@ -687,7 +687,7 @@
       SellOnlyByCSC, GlobalInstrumentType, IDCInstrumentType,
       Tier, LogDateTime, LogHostName,
       LogUserName) values
-      <foreach item="item" collection="list" separator="," open="(" close=")">
+      <foreach item="item" collection="list" separator=",">
         (#{item.date,jdbcType=TIMESTAMP}, #{item.instrument,jdbcType=VARCHAR}, #{item.market,jdbcType=VARCHAR},
         #{item.name,jdbcType=VARCHAR}, #{item.shortname,jdbcType=VARCHAR}, #{item.cname,jdbcType=NVARCHAR},
         #{item.cshortname,jdbcType=NVARCHAR}, #{item.instrumentclass,jdbcType=VARCHAR}, #{item.prodcode,jdbcType=VARCHAR},
