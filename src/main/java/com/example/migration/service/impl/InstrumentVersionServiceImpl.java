@@ -60,8 +60,9 @@ public class InstrumentVersionServiceImpl extends ServiceImpl<InstrumentVersionM
                     }
                 });
             } catch (Exception e) {
+                e.printStackTrace();
                 // 记录日志后继续
-                errorList.addAll(subList.stream().map(InstrumentVersion::getInstrument).collect(Collectors.toList()));
+                errorList.addAll(subList.stream().map(InstrumentVersion::getInstrument).distinct().collect(Collectors.toList()));
             }
         }
         return errorList;

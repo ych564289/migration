@@ -57,8 +57,9 @@ public class InstrumentExtVersionServiceImpl extends ServiceImpl<InstrumentExtVe
                     }
                 });
             } catch (Exception e) {
+                e.printStackTrace();
                 // 记录日志后继续
-                errorList.addAll(subList.stream().map(InstrumentExtVersion::getInstrument).collect(Collectors.toList()));
+                errorList.addAll(subList.stream().map(InstrumentExtVersion::getInstrument).distinct().collect(Collectors.toList()));
             }
         }
         return errorList;
