@@ -20,14 +20,8 @@ import javax.sql.DataSource;
         sqlSessionFactoryRef = "slaveSqlSessionFactory")
 public class SlaveDataSourceConfig {
 
-    private final PlatformTransactionManager transactionManager;
-
-    public SlaveDataSourceConfig(PlatformTransactionManager transactionManager) {
-        this.transactionManager = transactionManager;
-    }
-
     @Bean(name = "slaveTransactionTemplate") // 建议命名区分
-    public TransactionTemplate masterTransactionTemplate(@Qualifier("slaveTransactionManager") PlatformTransactionManager transactionManager) {
+    public TransactionTemplate slaveTransactionTemplate(@Qualifier("slaveTransactionManager") PlatformTransactionManager transactionManager) {
         return new TransactionTemplate(transactionManager);
     }
 

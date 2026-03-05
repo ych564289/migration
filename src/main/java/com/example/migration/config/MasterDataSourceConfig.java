@@ -20,12 +20,6 @@ import javax.sql.DataSource;
         sqlSessionFactoryRef = "masterSqlSessionFactory")
 public class MasterDataSourceConfig {
 
-    private final PlatformTransactionManager transactionManager;
-
-    public MasterDataSourceConfig(PlatformTransactionManager transactionManager) {
-        this.transactionManager = transactionManager;
-    }
-
     @Bean(name = "masterTransactionTemplate") // 建议命名区分
     public TransactionTemplate masterTransactionTemplate(@Qualifier("masterTransactionManager") PlatformTransactionManager transactionManager) {
         return new TransactionTemplate(transactionManager);
