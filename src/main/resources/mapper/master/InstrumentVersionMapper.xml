@@ -684,7 +684,7 @@
       SellOnlyByCSC, GlobalInstrumentType, IdcInstrumentType,
       Tier, LogDateTime, LogHostName, LogUserName
       ) values
-      <foreach item="item" collection="entityList" separator="," open="(" close=")">
+      <foreach item="item" collection="list" separator="," open="(" close=")">
         (#{item.date,jdbcType=TIMESTAMP}, #{item.instrument}, #{item.market},
         #{item.name}, #{item.description}, #{item.currency},
         #{item.transactionqtylimit}, #{item.dailyvaluelimit}, #{item.dailyqtylimit},

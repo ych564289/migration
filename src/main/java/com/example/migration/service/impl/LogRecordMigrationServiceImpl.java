@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -122,12 +123,14 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
                 Thread.currentThread().interrupt();
             }
         }
+        String logDir = System.getProperty("user.dir") + "/logs";
+        FileUtil.mkdir(logDir); // 确保目录存在
         // 记录文件
         if (CollectionUtil.isNotEmpty(errorInsertLogs)) {
-            FileUtil.writeUtf8Lines(errorInsertLogs,tableName + "_errorInsertLogs.txt");
+            FileUtil.writeUtf8Lines(errorInsertLogs,new File(logDir, tableName + "_errorInsertLogs.txt"));
         }
         if (CollectionUtil.isNotEmpty(errorUpdateLogs)) {
-            FileUtil.writeUtf8Lines(errorUpdateLogs, tableName + "_errorUpdateLogs.txt");
+            FileUtil.writeUtf8Lines(errorUpdateLogs,new File(logDir, tableName + "_errorUpdateLogs.txt"));
         }
         return "success";
     }
