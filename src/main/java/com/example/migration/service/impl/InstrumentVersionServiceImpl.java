@@ -51,7 +51,6 @@ public class InstrumentVersionServiceImpl extends ServiceImpl<InstrumentVersionM
             int end = Math.min(i + batchSize, list.size());
             List<InstrumentVersion> subList = list.subList(i, end);
 
-            boolean success = instrumentVersionMapper.saveBatch(subList);
             try {
                 transactionTemplate.execute(new TransactionCallbackWithoutResult() {
                     @Override
