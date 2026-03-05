@@ -41,7 +41,7 @@ public class InstrumentExtVersionServiceImpl extends ServiceImpl<InstrumentExtVe
             return Collections.emptyList();
         }
 
-        int batchSize = 1000;
+        int batchSize = 40;
         // 将 Collection 转换为 List 以便进行子列表操作
         List<InstrumentExtVersion> list = new ArrayList<>(entityList);
         List<String> errorList = new ArrayList<>();
