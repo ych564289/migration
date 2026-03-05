@@ -15,6 +15,8 @@ spring:
       hikari:
         maximum-pool-size: 20
         minimum-idle: 5
+        connection-timeout: 30000 # 连接超时
+        validation-timeout: 5000
     slave:
       driver-class-name: com.ibm.db2.jcc.DB2Driver
       #url: jdbc:oracle:thin:@10.11.198.16:1721:MSEUZ
@@ -24,6 +26,8 @@ spring:
       hikari:
         maximum-pool-size: 20
         minimum-idle: 5
+        connection-timeout: 30000 # 连接超时
+        validation-timeout: 5000
 
 mybatis:
   configuration:
