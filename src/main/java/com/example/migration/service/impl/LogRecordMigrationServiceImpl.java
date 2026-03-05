@@ -22,10 +22,7 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -63,7 +60,8 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
         List<String> keys = context.insertQueryGroup.get().stream().filter(StringUtils::isNotBlank).collect(Collectors.toList());
         int threadCount = Runtime.getRuntime().availableProcessors();
 
-        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(10,50,30,
+                TimeUnit.SECONDS,  new ArrayBlockingQueue<>(1000),  new ThreadPoolExecutor.CallerRunsPolicy());
         List<CompletableFuture<Void>> futures = new ArrayList<>();
         int batch = 1000;
         try {
@@ -76,24 +74,25 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
                     if (CollectionUtil.isNotEmpty(insertList)) {
                         processMigration(insertList, currentDate, context, true);
                     }
-                }, executor);
+                }, threadPoolExecutor);
                 futures.add(future);
             }
             // 阻塞主线程，直到所有批次任务完成
             CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
         }finally {
-            executor.shutdown();
+            threadPoolExecutor.shutdown();
             try {
-                if (!executor.awaitTermination(60, TimeUnit.SECONDS)) {
-                    executor.shutdownNow();
+                if (!threadPoolExecutor.awaitTermination(60, TimeUnit.SECONDS)) {
+                    threadPoolExecutor.shutdownNow();
                 }
             } catch (InterruptedException e) {
-                executor.shutdownNow();
+                threadPoolExecutor.shutdownNow();
                 Thread.currentThread().interrupt();
             }
         }
 
-        ExecutorService executorUpd = Executors.newFixedThreadPool(threadCount);
+        ThreadPoolExecutor threadPoolExecutorUpd = new ThreadPoolExecutor(10,50,30,
+                TimeUnit.SECONDS,  new ArrayBlockingQueue<>(1000),  new ThreadPoolExecutor.CallerRunsPolicy());
         List<CompletableFuture<Void>> futuresUpd = new ArrayList<>();
 
         List<String> updKeys = context.updateQueryGroup.get().stream().filter(StringUtils::isNotBlank).collect(Collectors.toList());
@@ -107,19 +106,19 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
                     if (CollectionUtil.isNotEmpty(updateList)) {
                         processMigration(updateList, currentDate, context, false);
                     }
-                    }, executorUpd);
+                    }, threadPoolExecutorUpd);
                 futuresUpd.add(future);
             }
             // 阻塞主线程，直到所有批次任务完成
             CompletableFuture.allOf(futuresUpd.toArray(new CompletableFuture[0])).join();
         } finally {
-            executorUpd.shutdown();
+            threadPoolExecutorUpd.shutdown();
             try {
-                if (!executorUpd.awaitTermination(60, TimeUnit.SECONDS)) {
-                    executorUpd.shutdownNow();
+                if (!threadPoolExecutorUpd.awaitTermination(60, TimeUnit.SECONDS)) {
+                    threadPoolExecutorUpd.shutdownNow();
                 }
             } catch (InterruptedException e) {
-                executorUpd.shutdownNow();
+                threadPoolExecutorUpd.shutdownNow();
                 Thread.currentThread().interrupt();
             }
         }
