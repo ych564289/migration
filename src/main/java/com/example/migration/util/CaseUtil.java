@@ -66,8 +66,13 @@ public class CaseUtil {
 
         System.out.println(toUpperCamelCase(input1)); // 输出: UserInfoList
 
-        String date = "20 Aug 2035";
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH);
+        String date = "Sep 12 2025  9:22PM";
+//        String date = "Oct  2 2025 10:58AM";
+        date = date.replaceAll("\\s+", " ");
+        // 2. 在时间和 AM/PM 之间添加空格 (解决 "10:58AM" 问题)
+        // 正则解释：查找数字后紧跟 AM 或 PM 的情况，并在中间插入空格
+        date = date.replaceAll("(\\d)([AaPp][Mm])", "$1 $2");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("MMM dd yyyy h:mm a", Locale.ENGLISH);
         try {
             System.out.println(dateFormat.parse(date));;
         } catch (ParseException e) {

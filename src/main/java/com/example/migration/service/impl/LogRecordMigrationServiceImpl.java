@@ -26,6 +26,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -182,25 +183,45 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
 
                 try {
                     populateInstrumentVersion(entity, fieldMap);
-                    resultList.add(entity);
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    List<String> keys = logList.stream().map(GenericLog::getTablekey1).distinct().collect(Collectors.toList());
-                    if (isInsert) {
-                        errorInsertLogs.addAll(keys);
-                    }else {
-                        errorUpdateLogs.addAll(keys);
-                    }
+                    throw new RuntimeException(e);
                 }
+                resultList.add(entity);
             }
         }
 
         // 保存结果
         if (CollectionUtil.isNotEmpty(resultList)) {
-            //context.saver.accept(resultList);
-            // 如果是 Insert 阶段，将结果存入上下文供 Update 阶段使用
-            if (isInsert) {
-                context.currentResultList.addAll(resultList);
+            List<String> failedKeys = context.saver.apply(resultList);
+            if (CollectionUtil.isNotEmpty(failedKeys)) {
+                Set<String> failedKeySet = new HashSet<>(failedKeys);
+
+                List<T> successList = resultList.stream()
+                        .filter(entity -> {
+                            String instrumentKey = null;
+                            if (entity instanceof InstrumentVersion) {
+                                instrumentKey = ((InstrumentVersion) entity).getInstrument();
+                            } else if (entity instanceof InstrumentExtVersion) {
+                                instrumentKey = ((InstrumentExtVersion) entity).getInstrument();
+                            }
+                            // 如果 Key 不在失败列表中，则保留
+                            return instrumentKey != null && !failedKeySet.contains(instrumentKey);
+                        })
+                        .collect(Collectors.toList());
+
+                // 记录错误日志
+                if (isInsert) {
+                    errorInsertLogs.addAll(failedKeys);
+                    // 只将成功的实体加入当前结果集供后续 Update 使用
+                    context.currentResultList.addAll(successList);
+                } else {
+                    errorUpdateLogs.addAll(failedKeys);
+                }
+            } else {
+                // 全部成功
+                if (isInsert) {
+                    context.currentResultList.addAll(resultList);
+                }
             }
         }
     }
@@ -237,7 +258,7 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
                     () -> genericLogMapper.queryInstrumentVersionUpdateGruopKey(),
                     InstrumentVersion::new,
                     (tablekey1, resultList, baseList) -> initInstrumentVersionHandle(tablekey1, (List<InstrumentVersion>) resultList, (List<InstrumentVersion>) baseList),
-                    (list) -> instrumentVersionService.saveBatch((List<InstrumentVersion>) list)
+                    (list) -> instrumentVersionService.saveInstrumentBatch((List<InstrumentVersion>) list)
             );
         } else if ("InstrumentExt".equals(tableName)) {
             return new MigrationContext(
@@ -247,7 +268,7 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
                     () -> genericLogMapper.queryInstrumentVersionExtUpdateGruopKey(),
                     InstrumentExtVersion::new,
                     (tablekey1, resultList, baseList) -> initInstrumentExtVersionHandle(tablekey1, (List<InstrumentExtVersion>) resultList, (List<InstrumentExtVersion>) baseList),
-                    (list) -> instrumentExtVersionService.saveBatch((List<InstrumentExtVersion>) list)
+                    (list) -> instrumentExtVersionService.saveInstrumentExtBatch((List<InstrumentExtVersion>) list)
             );
         }
         return null;
@@ -369,7 +390,7 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
         final Supplier<List<String>> updateQueryGroup;
         final Supplier<Object> creator;
         final TriFunction<String, List<?>, List<?>, Object> initializer;
-        final java.util.function.Consumer<List<?>> saver;
+        final Function<List<?>,List<String>> saver;
 
         // 用于在 Insert 和 Update 步骤间传递已处理的数据
         List<Object> currentResultList = Collections.synchronizedList(new ArrayList<>());
@@ -380,7 +401,7 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
                                 Supplier<List<String>> updateQueryGroup,
                                 Supplier<?> creator,
                                 TriFunction<String, List<?>, List<?>, ?> initializer,
-                                java.util.function.Consumer<List<?>> saver) {
+                                Function<List<?>,List<String>> saver) {
             this.insertQuery = insertQuery;
             this.updateQuery = updateQuery;
             this.insertQueryGroup = insertQueryGroup;
