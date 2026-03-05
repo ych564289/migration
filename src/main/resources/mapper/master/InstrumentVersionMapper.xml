@@ -665,7 +665,7 @@
   </insert>
     <insert id="saveBatch">
       insert into InstrumentVersion (Date, Instrument, Market,
-      Name, Description, Currency,
+      Name,
       Transactionqtylimit, Dailyvaluelimit, Dailyqtylimit,
       Expirydate, Active, Marginpercent,
       Series, Pricecap, Calculationprice,
@@ -686,7 +686,7 @@
       ) values
       <foreach item="item" collection="list" separator="," open="(" close=")">
         (#{item.date,jdbcType=TIMESTAMP}, #{item.instrument}, #{item.market},
-        #{item.name}, #{item.description}, #{item.currency},
+        #{item.name},
         #{item.transactionqtylimit}, #{item.dailyvaluelimit}, #{item.dailyqtylimit},
         #{item.expirydate,jdbcType=TIMESTAMP}, #{item.active}, #{item.marginpercent},
         #{item.series}, #{item.pricecap}, #{item.calculationprice},
