@@ -479,21 +479,21 @@
       IsStaffExemption, VirtualAsset, LogDateTime,
       LogHostName, LogUserName)
       values <foreach item="item" collection="list" separator="," index="index">
-      (#{date,jdbcType=TIMESTAMP}, #{instrument,jdbcType=VARCHAR}, #{market,jdbcType=VARCHAR},
-      #{defaultchargeccy,jdbcType=VARCHAR}, #{couponrate,jdbcType=NUMERIC}, #{priceinpercentoramount,jdbcType=VARCHAR},
-      #{lastcoupondate,jdbcType=TIMESTAMP}, #{nextcoupondate,jdbcType=TIMESTAMP}, #{fundhouse,jdbcType=VARCHAR},
-      #{totalissuedshares,jdbcType=NUMERIC}, #{instrumentsection,jdbcType=VARCHAR}, #{couponperiod,jdbcType=VARCHAR},
-      #{rateperiod,jdbcType=INTEGER}, #{convertinstrument,jdbcType=VARCHAR}, #{convertmarket,jdbcType=VARCHAR},
-      #{convertdepot,jdbcType=VARCHAR}, #{convertlocation,jdbcType=VARCHAR}, #{confirmdays,jdbcType=INTEGER},
-      #{settledays,jdbcType=INTEGER}, #{elitype,jdbcType=VARCHAR}, #{issueprice,jdbcType=NUMERIC},
-      #{strikeprice,jdbcType=NUMERIC}, #{strikepriceupper,jdbcType=NUMERIC}, #{settlemode,jdbcType=VARCHAR},
-      #{instsettledate,jdbcType=TIMESTAMP}, #{issuer,jdbcType=VARCHAR}, #{unitrounding,jdbcType=INTEGER},
-      #{roundingtype,jdbcType=VARCHAR}, #{fundhousefee,jdbcType=NUMERIC}, #{additionalfee,jdbcType=NUMERIC},
-      #{minredemptedamount,jdbcType=NUMERIC}, #{minremainingamount,jdbcType=NUMERIC},
-      #{shorttradedays,jdbcType=INTEGER}, #{syncref,jdbcType=VARCHAR}, #{underindex,jdbcType=VARCHAR},
-      #{callprice,jdbcType=NUMERIC}, #{aastocks,jdbcType=VARCHAR}, #{pshk,jdbcType=VARCHAR},
-      #{isstaffexemption,jdbcType=CHAR}, #{virtualasset,jdbcType=CHAR}, #{logdatetime,jdbcType=TIMESTAMP},
-      #{loghostname,jdbcType=VARCHAR}, #{logusername,jdbcType=VARCHAR})
+      (#{item.date,jdbcType=TIMESTAMP}, #{item.instrument,jdbcType=VARCHAR}, #{item.market,jdbcType=VARCHAR},
+      #{item.defaultchargeccy,jdbcType=VARCHAR}, #{item.couponrate,jdbcType=NUMERIC}, #{item.priceinpercentoramount,jdbcType=VARCHAR},
+      #{item.lastcoupondate,jdbcType=TIMESTAMP}, #{item.nextcoupondate,jdbcType=TIMESTAMP}, #{item.fundhouse,jdbcType=VARCHAR},
+      #{item.totalissuedshares,jdbcType=NUMERIC}, #{item.instrumentsection,jdbcType=VARCHAR}, #{item.couponperiod,jdbcType=VARCHAR},
+      #{item.rateperiod,jdbcType=INTEGER}, #{item.convertinstrument,jdbcType=VARCHAR}, #{item.convertmarket,jdbcType=VARCHAR},
+      #{item.convertdepot,jdbcType=VARCHAR}, #{item.convertlocation,jdbcType=VARCHAR}, #{item.confirmdays,jdbcType=INTEGER},
+      #{item.settledays,jdbcType=INTEGER}, #{item.elitype,jdbcType=VARCHAR}, #{item.issueprice,jdbcType=NUMERIC},
+      #{item.strikeprice,jdbcType=NUMERIC}, #{item.strikepriceupper,jdbcType=NUMERIC}, #{item.settlemode,jdbcType=VARCHAR},
+      #{item.instsettledate,jdbcType=TIMESTAMP}, #{item.issuer,jdbcType=VARCHAR}, #{item.unitrounding,jdbcType=INTEGER},
+      #{item.roundingtype,jdbcType=VARCHAR}, #{item.fundhousefee,jdbcType=NUMERIC}, #{item.additionalfee,jdbcType=NUMERIC},
+      #{item.minredemptedamount,jdbcType=NUMERIC}, #{item.minremainingamount,jdbcType=NUMERIC},
+      #{item.shorttradedays,jdbcType=INTEGER}, #{item.syncref,jdbcType=VARCHAR}, #{item.underindex,jdbcType=VARCHAR},
+      #{item.callprice,jdbcType=NUMERIC}, #{item.aastocks,jdbcType=VARCHAR}, #{item.pshk,jdbcType=VARCHAR},
+      #{item.isstaffexemption,jdbcType=CHAR}, #{item.virtualasset,jdbcType=CHAR}, #{item.logdatetime,jdbcType=TIMESTAMP},
+      #{item.loghostname,jdbcType=VARCHAR}, #{item.logusername,jdbcType=VARCHAR})
     </foreach>
     </insert>
     <select id="countByExample" parameterType="com.example.migration.dao.master.entity.InstrumentExtVersionExample" resultType="java.lang.Long">
