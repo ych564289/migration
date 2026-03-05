@@ -464,30 +464,36 @@
   </insert>
     <insert id="saveBatch">
       insert into InstrumentExtVersion (Date, Instrument, Market,
-      DefaultChargeCcy, CouponRate, PriceInPercentOrAmount,
+      DefaultChargeCCY, CouponRate, PriceInPercentOrAmount,
       LastCouponDate, NextCouponDate, FundHouse,
       TotalIssuedShares, InstrumentSection, CouponPeriod,
       RatePeriod, ConvertInstrument, ConvertMarket,
       ConvertDepot, ConvertLocation, ConfirmDays,
-      SettleDays, ELIType, IssuePrice, StrikePrice, StrikePriceUpper,
-      SettleMode, InstSettleDate, Issuer, UnitRounding,
-      RoundingType, FundHouseFee, AdditionalFee, MinRedemptedAmount,
-      MinRemainingAmount, ShortTradeDays, SyncRef, UnderIndex,
-      CallPrice, AAStocks, PSHK, IsStaffExemption, VirtualAsset,
-      LogDateTime, LogHostName, LogUserName
-      ) values <foreach item="item" collection="list" separator="," index="index">
-      (#{item.date,jdbcType=TIMESTAMP}, #{item.instrument}, #{item.market},
-      #{item.defaultchargeccy}, #{item.couponrate}, #{item.priceinpercentoramount},
-      #{item.lastcoupondate,jdbcType=TIMESTAMP}, #{item.nextcoupondate,jdbcType=TIMESTAMP}, #{item.fundhouse},
-      #{item.totalissuedshares}, #{item.instrumentsection}, #{item.couponperiod},
-      #{item.rateperiod}, #{item.convertinstrument}, #{item.convertmarket},
-      #{item.convertdepot}, #{item.convertlocation}, #{item.confirmdays},#{item.settledays},
-       #{item.elitype}, #{item.issueprice}, #{item.strikeprice}, #{item.strikepriceupper}, #{item.settlemode},
-       #{item.instsettledate,jdbcType=TIMESTAMP}, #{item.issuer}, #{item.unitrounding},#{item.roundingtype},#{item.fundhousefee},
-       #{item.additionalfee}, #{item.minredemptedamount}, #{item.minremainingamount}, #{item.shorttradedays}, #{item.syncref},
-       #{item.underindex}, #{item.callprice}, #{item.aastocks}, #{item.pshk}, #{item.isstaffexemption}, #{item.virtualasset},
-       #{item.logdatetime,jdbcType=TIMESTAMP}, #{item.loghostname}, #{item.logusername}
-      )
+      SettleDays, ELIType, IssuePrice,
+      StrikePrice, StrikePriceUpper, SettleMode,
+      InstSettleDate, Issuer, UnitRounding,
+      RoundingType, FundHouseFee, AdditionalFee,
+      MinRedemptedAmount, MinRemainingAmount,
+      ShortTradeDays, SyncRef, UnderIndex,
+      CallPrice, AAStocks, PSHK,
+      IsStaffExemption, VirtualAsset, LogDateTime,
+      LogHostName, LogUserName)
+      values <foreach item="item" collection="list" separator="," index="index">
+      (#{date,jdbcType=TIMESTAMP}, #{instrument,jdbcType=VARCHAR}, #{market,jdbcType=VARCHAR},
+      #{defaultchargeccy,jdbcType=VARCHAR}, #{couponrate,jdbcType=NUMERIC}, #{priceinpercentoramount,jdbcType=VARCHAR},
+      #{lastcoupondate,jdbcType=TIMESTAMP}, #{nextcoupondate,jdbcType=TIMESTAMP}, #{fundhouse,jdbcType=VARCHAR},
+      #{totalissuedshares,jdbcType=NUMERIC}, #{instrumentsection,jdbcType=VARCHAR}, #{couponperiod,jdbcType=VARCHAR},
+      #{rateperiod,jdbcType=INTEGER}, #{convertinstrument,jdbcType=VARCHAR}, #{convertmarket,jdbcType=VARCHAR},
+      #{convertdepot,jdbcType=VARCHAR}, #{convertlocation,jdbcType=VARCHAR}, #{confirmdays,jdbcType=INTEGER},
+      #{settledays,jdbcType=INTEGER}, #{elitype,jdbcType=VARCHAR}, #{issueprice,jdbcType=NUMERIC},
+      #{strikeprice,jdbcType=NUMERIC}, #{strikepriceupper,jdbcType=NUMERIC}, #{settlemode,jdbcType=VARCHAR},
+      #{instsettledate,jdbcType=TIMESTAMP}, #{issuer,jdbcType=VARCHAR}, #{unitrounding,jdbcType=INTEGER},
+      #{roundingtype,jdbcType=VARCHAR}, #{fundhousefee,jdbcType=NUMERIC}, #{additionalfee,jdbcType=NUMERIC},
+      #{minredemptedamount,jdbcType=NUMERIC}, #{minremainingamount,jdbcType=NUMERIC},
+      #{shorttradedays,jdbcType=INTEGER}, #{syncref,jdbcType=VARCHAR}, #{underindex,jdbcType=VARCHAR},
+      #{callprice,jdbcType=NUMERIC}, #{aastocks,jdbcType=VARCHAR}, #{pshk,jdbcType=VARCHAR},
+      #{isstaffexemption,jdbcType=CHAR}, #{virtualasset,jdbcType=CHAR}, #{logdatetime,jdbcType=TIMESTAMP},
+      #{loghostname,jdbcType=VARCHAR}, #{logusername,jdbcType=VARCHAR})
     </foreach>
     </insert>
     <select id="countByExample" parameterType="com.example.migration.dao.master.entity.InstrumentExtVersionExample" resultType="java.lang.Long">
