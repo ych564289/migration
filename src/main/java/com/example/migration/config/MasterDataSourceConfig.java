@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
 
@@ -18,6 +19,17 @@ import javax.sql.DataSource;
 @MapperScan(basePackages = "com.example.migration.dao.master.mapper",
         sqlSessionFactoryRef = "masterSqlSessionFactory")
 public class MasterDataSourceConfig {
+
+    private final PlatformTransactionManager transactionManager;
+
+    public MasterDataSourceConfig(PlatformTransactionManager transactionManager) {
+        this.transactionManager = transactionManager;
+    }
+
+    @Bean(name = "masterTransactionTemplate") // 建议命名区分
+    public TransactionTemplate masterTransactionTemplate(@Qualifier("masterTransactionManager") PlatformTransactionManager transactionManager) {
+        return new TransactionTemplate(transactionManager);
+    }
 
     @Bean
     @ConfigurationProperties("spring.datasource.master")
@@ -39,11 +51,6 @@ public class MasterDataSourceConfig {
     @Bean
     public DataSourceTransactionManager masterTransactionManager(
             @Qualifier("masterDataSource") DataSource dataSource) {
-        return new DataSourceTransactionManager(dataSource);
-    }
-
-    @Bean(name = "midDataSourceTransactionManager")
-    public PlatformTransactionManager midDataSourceTransactionManager(@Qualifier("masterDataSource") DataSource dataSource) {
         return new DataSourceTransactionManager(dataSource);
     }
 }

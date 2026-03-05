@@ -26,6 +26,7 @@ public class InstrumentExtVersionServiceImpl extends ServiceImpl<InstrumentExtVe
     private InstrumentExtVersionMapper instrumentExtVersionMapper;
 
     @Autowired
+    @Qualifier("masterTransactionTemplate")
     private TransactionTemplate transactionTemplate;
 
 
