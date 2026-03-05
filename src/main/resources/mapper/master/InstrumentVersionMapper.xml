@@ -685,19 +685,19 @@
       Tier, LogDateTime, LogHostName, LogUserName
       ) values
       <foreach item="item" collection="entityList" separator="," open="(" close=")">
-        (#{item.date}, #{item.instrument}, #{item.market},
+        (#{item.date,jdbcType=TIMESTAMP}, #{item.instrument}, #{item.market},
         #{item.name}, #{item.description}, #{item.currency},
         #{item.transactionqtylimit}, #{item.dailyvaluelimit}, #{item.dailyqtylimit},
-        #{item.expirydate}, #{item.active}, #{item.marginpercent},
+        #{item.expirydate,jdbcType=TIMESTAMP}, #{item.active}, #{item.marginpercent},
         #{item.series}, #{item.pricecap}, #{item.calculationprice},
         #{item.suspended}, #{item.tradingccy}, #{item.exchangecode}, #{item.exchangeInternalcode}, #{item.bloomberg},
-         #{item.reuters}, #{item.isin}, #{item.sedol}, #{item.firstdealingdate},#{item.lastdealingdate},
+         #{item.reuters}, #{item.isin}, #{item.sedol}, #{item.firstdealingdate,jdbcType=TIMESTAMP},#{item.lastdealingdate,jdbcType=TIMESTAMP},
           #{item.electronicclearing}, #{item.shortsell}, #{item.parvalue}, #{item.fee1}, #{item.fee2}, #{item.fee3}, #{item.fee4},
           #{item.fee5}, #{item.fee6}, #{item.fee7}, #{item.fee8}, #{item.fee9}, #{item.fee10},#{item.category}, #{item.spreadtablecode},
-          #{item.statusflag}, #{item.instrumenttype}, #{item.dateoflisted}, #{item.illiquidcollateralcalculation}, #{item.syncref}, #{item.undermarket},
-          #{item.understock}, #{item.suspendfrom}, #{item.lastsuspendprice}, #{item.instdepotcode}, #{item.instlocation}, #{item.navdate},
+          #{item.statusflag}, #{item.instrumenttype}, #{item.dateoflisted,jdbcType=TIMESTAMP}, #{item.illiquidcollateralcalculation}, #{item.syncref}, #{item.undermarket},
+          #{item.understock}, #{item.suspendfrom}, #{item.lastsuspendprice}, #{item.instdepotcode}, #{item.instlocation}, #{item.navdate,jdbcType=TIMESTAMP},
           #{item.collateralratio}, #{item.interestratecategory}, #{item.nobuy}, #{item.nosell}, #{item.sellonlybycsc}, #{item.globalinstrumenttype}, #{item.idcinstrumenttype},
-          #{item.tier}, #{item.logdatetime}, #{item.loghostname}, #{item.logusername}
+          #{item.tier}, #{item.logdatetime,jdbcType=TIMESTAMP}, #{item.loghostname}, #{item.logusername}
         )
       </foreach>
     </insert>

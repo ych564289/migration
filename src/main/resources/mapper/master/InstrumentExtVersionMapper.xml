@@ -476,17 +476,17 @@
       CallPrice, AAStocks, PSHK, IsStaffExemption, VirtualAsset,
       LogDateTime, LogHostName, LogUserName
       ) values <foreach item="item" collection="list" separator="," index="index">
-      (#{item.date}, #{item.instrument}, #{item.market},
+      (#{item.date,jdbcType=TIMESTAMP}, #{item.instrument}, #{item.market},
       #{item.defaultchargeccy}, #{item.couponrate}, #{item.priceinpercentoramount},
-      #{item.lastcoupondate}, #{item.nextcoupondate}, #{item.fundhouse},
+      #{item.lastcoupondate,jdbcType=TIMESTAMP}, #{item.nextcoupondate,jdbcType=TIMESTAMP}, #{item.fundhouse},
       #{item.totalissuedshares}, #{item.instrumentsection}, #{item.couponperiod},
       #{item.rateperiod}, #{item.convertinstrument}, #{item.convertmarket},
       #{item.convertdepot}, #{item.convertlocation}, #{item.confirmdays},#{item.settledays},
        #{item.elitype}, #{item.issueprice}, #{item.strikeprice}, #{item.strikepriceupper}, #{item.settlemode},
-       #{item.instsettledate}, #{item.issuer}, #{item.unitrounding},#{item.roundingtype},#{item.fundhousefee},
+       #{item.instsettledate,jdbcType=TIMESTAMP}, #{item.issuer}, #{item.unitrounding},#{item.roundingtype},#{item.fundhousefee},
        #{item.additionalfee}, #{item.minredemptedamount}, #{item.minremainingamount}, #{item.shorttradedays}, #{item.syncref},
        #{item.underindex}, #{item.callprice}, #{item.aastocks}, #{item.pshk}, #{item.isstaffexemption}, #{item.virtualasset},
-       #{item.logdatetime}, #{item.loghostname}, #{item.logusername}
+       #{item.logdatetime,jdbcType=TIMESTAMP}, #{item.loghostname}, #{item.logusername}
       )
     </foreach>
     </insert>
