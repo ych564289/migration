@@ -241,16 +241,16 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
     private <T> void setCommonLogFields(T entity, GenericLog log) {
         if (entity instanceof InstrumentVersion) {
             InstrumentVersion iv = (InstrumentVersion) entity;
-            iv.setDate(getFormattedDate(iv.getLogdatetime()));
             iv.setLogdatetime(log.getLogdatetime());
             iv.setLoghostname(log.getLoghostname());
             iv.setLogusername(log.getLogusername());
+            iv.setDate(getFormattedDate(iv.getLogdatetime()));
         } else if (entity instanceof InstrumentExtVersion) {
             InstrumentExtVersion iev = (InstrumentExtVersion) entity;
-            iev.setDate(getFormattedDate(iev.getLogdatetime()));
             iev.setLogdatetime(log.getLogdatetime());
             iev.setLoghostname(log.getLoghostname());
             iev.setLogusername(log.getLogusername());
+            iev.setDate(getFormattedDate(iev.getLogdatetime()));
         }
     }
 
