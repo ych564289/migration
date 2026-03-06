@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface InstrumentVersionService extends IService<InstrumentVersion> {
     List<String> saveInstrumentBatch(List<InstrumentVersion> list);
+
+    void deleteInstrument();
 }

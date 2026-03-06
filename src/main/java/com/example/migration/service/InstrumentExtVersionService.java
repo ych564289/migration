@@ -10,4 +10,5 @@ public interface InstrumentExtVersionService extends IService<InstrumentExtVersi
 
     List<String> saveInstrumentExtBatch(List<InstrumentExtVersion> instrumentExtVersions);
 
+    void deleteInstrumentExt();
 }

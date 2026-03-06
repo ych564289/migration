@@ -75,4 +75,6 @@ public interface InstrumentExtVersionMapper extends BaseMapper<InstrumentExtVers
     int updateByExample(@Param("record") InstrumentExtVersion record, @Param("example") InstrumentExtVersionExample example);
 
     boolean saveBatch(Collection<InstrumentExtVersion> entityList);
+
+    void deleteInstrumentExt();
 }

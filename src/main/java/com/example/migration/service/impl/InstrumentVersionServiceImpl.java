@@ -67,4 +67,9 @@ public class InstrumentVersionServiceImpl extends ServiceImpl<InstrumentVersionM
         }
         return errorList;
     }
+
+    @Override
+    public void deleteInstrument() {
+        instrumentVersionMapper.deleteInstrument();
+    }
 }

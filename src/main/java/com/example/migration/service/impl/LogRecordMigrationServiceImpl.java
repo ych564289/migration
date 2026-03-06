@@ -13,6 +13,7 @@ import com.example.migration.service.InstrumentVersionService;
 import com.example.migration.service.LogRecordMigrationService;
 import com.example.migration.util.CaseUtil;
 import com.alibaba.excel.util.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +31,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class LogRecordMigrationServiceImpl implements LogRecordMigrationService {
 
     @Autowired
@@ -49,17 +51,20 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
     //@Transactional(rollbackFor = Exception.class,value = "masterTransactionManager")
     public String migration(MigrationReq req) {
         String tableName = req.getTableName();
-        Date currentDate = new Date();
 
         // 获取对应的迁移上下文配置
         MigrationContext context = getMigrationContext(tableName);
         if (context == null) {
             throw new IllegalArgumentException("Unsupported table name: " + tableName);
         }
+        if ("Instrument".equals(tableName)) {
+            instrumentVersionService.deleteInstrument();
+        }else if ("InstrumentExt".equals(tableName)) {
+            instrumentExtVersionService.deleteInstrumentExt();
+        }
 
         // 处理插入数据
         List<String> keys = context.insertQueryGroup.get().stream().filter(StringUtils::isNotBlank).collect(Collectors.toList());
-        int threadCount = Runtime.getRuntime().availableProcessors();
 
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(10,50,30,
                 TimeUnit.SECONDS,  new ArrayBlockingQueue<>(1000),  new ThreadPoolExecutor.CallerRunsPolicy());
@@ -73,7 +78,7 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
                     // 执行具体的查询和处理逻辑
                     List<GenericLog> insertList = context.insertQuery.apply(subList);
                     if (CollectionUtil.isNotEmpty(insertList)) {
-                        processMigration(insertList, currentDate, context, true);
+                        processMigration(insertList, context, true);
                     }
                 }, threadPoolExecutor);
                 futures.add(future);
@@ -105,7 +110,7 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
                 CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
                     List<GenericLog> updateList = context.updateQuery.apply(subList);
                     if (CollectionUtil.isNotEmpty(updateList)) {
-                        processMigration(updateList, currentDate, context, false);
+                        processMigration(updateList, context, false);
                     }
                     }, threadPoolExecutorUpd);
                 futuresUpd.add(future);
@@ -139,12 +144,14 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
      * 通用迁移处理逻辑
      *
      * @param logList      日志列表
-     * @param currentDate  当前时间
      * @param context      迁移上下文
      * @param isInsert     是否为插入操作
      */
     @SuppressWarnings("unchecked")
-    private <T> void processMigration(List<GenericLog> logList, Date currentDate, MigrationContext context, boolean isInsert) {
+    private <T> void processMigration(List<GenericLog> logList, MigrationContext context, boolean isInsert) {
+        logList = logList.stream()
+                .filter(e -> ObjectUtil.isNotEmpty(e.getTablekey1()))
+                .collect(Collectors.toList());
         // 按 key 和时间分组
         Map<String, Map<Date, List<GenericLog>>> groupedMap = logList.stream()
                 .filter(e -> ObjectUtil.isNotEmpty(e.getTablekey1()))
@@ -180,11 +187,10 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
                     }
                 }
 
-                // 设置公共日志字段
-                setCommonLogFields(entity, log, currentDate);
-
                 try {
                     populateInstrumentVersion(entity, fieldMap);
+                    // 设置公共日志字段
+                    setCommonLogFields(entity, log);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -232,19 +238,35 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
      * 设置公共日志字段 (利用泛型擦除和 instanceof 处理多态)
      */
     @SuppressWarnings("unchecked")
-    private <T> void setCommonLogFields(T entity, GenericLog log, Date date) {
+    private <T> void setCommonLogFields(T entity, GenericLog log) {
         if (entity instanceof InstrumentVersion) {
             InstrumentVersion iv = (InstrumentVersion) entity;
-            iv.setDate(date);
+            iv.setDate(getFormattedDate(iv.getLogdatetime()));
             iv.setLogdatetime(log.getLogdatetime());
             iv.setLoghostname(log.getLoghostname());
             iv.setLogusername(log.getLogusername());
         } else if (entity instanceof InstrumentExtVersion) {
             InstrumentExtVersion iev = (InstrumentExtVersion) entity;
-            iev.setDate(date);
+            iev.setDate(getFormattedDate(iev.getLogdatetime()));
             iev.setLogdatetime(log.getLogdatetime());
             iev.setLoghostname(log.getLoghostname());
             iev.setLogusername(log.getLogusername());
+        }
+    }
+
+    public Date getFormattedDate(Date date) {
+        if (date == null) {
+            return null;
+        }
+        // 返回 "dd MMM yyyy" 格式的字符串，例如 "20 Aug 2035"
+        SimpleDateFormat format = new SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH);
+        String s = format.format(date);
+        // 执行解析
+        try {
+            return format.parse(s);
+        } catch (ParseException e) {
+            log.error("Error parsing date: {}", e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 

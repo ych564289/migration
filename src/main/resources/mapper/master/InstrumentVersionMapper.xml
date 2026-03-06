@@ -186,6 +186,9 @@
       <include refid="Example_Where_Clause" />
     </if>
   </delete>
+  <delete id="deleteInstrument">
+    TRUNCATE TABLE InstrumentVersion
+  </delete>
   <insert id="insert" parameterType="com.example.migration.dao.master.entity.InstrumentVersion">
     <!--
       WARNING - @mbg.generated
