@@ -183,7 +183,7 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
                     // Update 场景：尝试获取已有对象进行增量更新，否则新建
                     entity = (T) context.initializer.apply(log.getTablekey1(), resultList, baseList);
                     if (entity == null) {
-                        entity = (T) context.creator.get();
+                        continue;
                     }
                 }
 
