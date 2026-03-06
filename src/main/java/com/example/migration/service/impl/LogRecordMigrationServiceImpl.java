@@ -244,13 +244,13 @@ public class LogRecordMigrationServiceImpl implements LogRecordMigrationService 
             iv.setLogdatetime(log.getLogdatetime());
             iv.setLoghostname(log.getLoghostname());
             iv.setLogusername(log.getLogusername());
-            iv.setDate(getFormattedDate(iv.getLogdatetime()));
+            iv.setDate(getFormattedDate(log.getLogdatetime()));
         } else if (entity instanceof InstrumentExtVersion) {
             InstrumentExtVersion iev = (InstrumentExtVersion) entity;
             iev.setLogdatetime(log.getLogdatetime());
             iev.setLoghostname(log.getLoghostname());
             iev.setLogusername(log.getLogusername());
-            iev.setDate(getFormattedDate(iev.getLogdatetime()));
+            iev.setDate(getFormattedDate(log.getLogdatetime()));
         }
     }
 
