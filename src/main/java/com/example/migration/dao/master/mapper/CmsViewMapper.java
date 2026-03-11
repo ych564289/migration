@@ -70,4 +70,6 @@ public interface CmsViewMapper {
      * @mbg.generated
      */
     int updateByExample(@Param("record") CmsView record, @Param("example") CmsViewExample example);
+
+    List<CmsView> queryCmsViewList();
 }

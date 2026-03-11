@@ -432,7 +432,8 @@ public class InstrumentBalanceHandle implements ExportDifferentialStrategy {
                     e.setClntCode(e.getClntCode().trim()); // 先 trim 再设置
                 })
                 .collect(Collectors.toList());
-        List<CmsView> cmsViews = fetchCmsViewsInParallel(spInstrumentBalanceClosingAsAts);
+//        List<CmsView> cmsViews = fetchCmsViewsInParallel(spInstrumentBalanceClosingAsAts);
+        List<CmsView> cmsViews = cmsViewMapper.queryCmsViewList();
         Map<String, String> acctMap = cmsViews.stream()
                 .collect(Collectors.toMap(CmsView::getAccountcode, CmsView::getDefaulttradingacc, (a, b) -> a));
 

@@ -367,7 +367,8 @@ public class CashBalanceHandle implements ExportDifferentialStrategy {
                 })
                 .collect(Collectors.toList());
 
-        List<CmsView> cmsViews = fetchCmsViewsInParallel(spCashBalanceClosingAsAts);
+//        List<CmsView> cmsViews = fetchCmsViewsInParallel(spCashBalanceClosingAsAts);
+        List<CmsView> cmsViews = cmsViewMapper.queryCmsViewList();
         Map<String, String> acctMap = cmsViews.stream()
                 .collect(Collectors.toMap(CmsView::getAccountcode, CmsView::getDefaulttradingacc, (a, b) -> a));
 
