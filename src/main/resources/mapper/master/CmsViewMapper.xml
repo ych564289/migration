@@ -201,14 +201,14 @@
   </select>
     <select id="queryCmsViewList" resultType="com.example.migration.dao.master.entity.CmsView">
       select
-        normal.ClntCode,
+        normal.ClntCode as accountcode,
         case when dvp.ClntCode is null  then 'DVP'
              when normal.AcctType =  'CASH' then 'CASH'
              when normal.AcctType =  'CUST' then 'CASH'
              when normal.AcctType =  'MRGN' then 'MRGN'
              when normal.Lender =  'Y' then 'SBL'
              when normal.borrower = 'Y' then 'SBL'
-          end as defaultclientcode
+          end as defaulttradingacc
       from
         (select distinct clnt.ClntCode, typ.AcctType, typ.Lender , typ.Borrower  from clnt clnt , ClntAcctType typ
          where clnt.clntcode = typ.ClntCode and typ.active = 'Yes' ) normal left outer join
