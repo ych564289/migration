@@ -35,5 +35,18 @@ SELECT  '083282' AS clientid, 'HKD' AS ccy, -53.0 AS issueamt , 'TTL BO issue - 
 
 SELECT  '186602' AS clientid, 'HKD' AS ccy, -110.48 - 1470.64 AS issueamt , 'TTL BO issue - Missing MQ' AS rem FROM  SCDUMMY UNION ALL SELECT  '091757' AS clientid, 'USD' AS ccy, 197675.18 - 197673.84 AS issueamt , 'TTL BO issue - Missing MQ' AS rem FROM  SCDUMMY UNION ALL SELECT  '006451' AS clientid, 'HKD' AS ccy, 2341833.35 - 2338938.98 AS issueamt , 'TTL BO issue - Missing MQ' AS rem FROM  SCDUMMY  UNION ALL SELECT  '083282' AS clientid, 'HKD' AS ccy, -53.0 AS issueamt , 'TTL BO issue - Missing MQ' AS rem FROM  SCDUMMY
 
-
+select
+    normal.ClntCode,
+    case when dvp.ClntCode is null  then 3
+         when normal.AcctType =  'CASH' then 1
+         when normal.AcctType =  'CUST' then 1
+         when normal.AcctType =  'MRGN' then 2
+         when normal.Lender =  'Y' then 4
+         when normal.borrower = 'Y' then 4
+        end as defaultclientcode
+from
+    (select distinct clnt.ClntCode, typ.AcctType, typ.Lender , typ.Borrower  from clnt clnt , ClntAcctType typ
+     where clnt.clntcode = typ.ClntCode and typ.active = 'Yes' ) normal left outer join
+    ( Select Distinct ClntCode from ClntMarketAcctTypeSum where SettleMethod = 'CHEQUE' and AcctType = 'CASH') dvp
+    on normal.clntcode = dvp.ClntCode
 
