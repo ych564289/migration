@@ -70,4 +70,6 @@ public interface VcbaccountMapper {
      * @mbg.generated
      */
     int updateByExample(@Param("record") Vcbaccount record, @Param("example") VcbaccountExample example);
+
+    List<Vcbaccount> selectByExampleList(List<String> batchClientIds, List<Integer> accountSeqs, List<String> currencyIds);
 }

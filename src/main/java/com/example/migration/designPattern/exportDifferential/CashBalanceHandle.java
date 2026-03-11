@@ -509,7 +509,7 @@ public class CashBalanceHandle implements ExportDifferentialStrategy {
                 criteria.andClientidIn(batchClientIds);
                 criteria.andAccountseqIn(accountSeqs);
                 criteria.andCurrencyidIn(currencyIds);
-                return vcbaccountMapper.selectByExample(example);
+                return vcbaccountMapper.selectByExampleList(batchClientIds, accountSeqs, currencyIds);
             };
 
             Future<List<Vcbaccount>> future = executorService.submit(task);
