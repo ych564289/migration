@@ -72,4 +72,6 @@ public interface VcbaccountMapper {
     int updateByExample(@Param("record") Vcbaccount record, @Param("example") VcbaccountExample example);
 
     List<Vcbaccount> selectByExampleList(@Param("batchClientIds") List<String> batchClientIds, @Param("accountSeqs") List<Integer> accountSeqs,@Param("currencyIds") List<String> currencyIds);
+
+    List<Vcbaccount> selectVcbaccountLimt(@Param("currentPage") int currentPage, @Param("pageSize") int pageSize);
 }

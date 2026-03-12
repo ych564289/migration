@@ -2141,4 +2141,10 @@
         </foreach>
       </if>
     </select>
+    <select id="selectVcbaccountLimt" resultType="com.example.migration.dao.slave.entity.Vcbaccount">
+        SELECT *
+        FROM Vcbaccount
+        OFFSET #{currentPage} ROWS
+        FETCH FIRST #{pageSize} ROWS ONLY
+    </select>
 </mapper>

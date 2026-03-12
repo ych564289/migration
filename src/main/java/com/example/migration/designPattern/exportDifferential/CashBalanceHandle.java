@@ -261,7 +261,8 @@ public class CashBalanceHandle implements ExportDifferentialStrategy {
                 Callable<List<Vcbaccount>> task = () -> {
                     VcbaccountExample example = new VcbaccountExample();
                     RowBounds rowBounds = new RowBounds(currentPage * pageSize, pageSize);
-                    return vcbaccountMapper.selectByExampleWithRowbounds(example, rowBounds);
+//                    return vcbaccountMapper.selectByExampleWithRowbounds(example, rowBounds);
+                    return vcbaccountMapper.selectVcbaccountLimt(currentPage * pageSize, pageSize);
                 };
                 Future<List<Vcbaccount>> future = executorService.submit(task);
                 futures.add(future);
