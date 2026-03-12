@@ -2123,7 +2123,7 @@
       select * from VCBACCOUNT
       where 1=1
       <if test="batchClientIds != null">
-        CLIENTID in
+        and CLIENTID in
         <foreach close=")" collection="batchClientIds" item="listItem" open="(" separator=",">
           #{listItem}
         </foreach>
