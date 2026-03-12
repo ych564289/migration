@@ -125,6 +125,9 @@ public class InstrumentBalanceHandle implements ExportDifferentialStrategy {
      * 根据 BalanceType 处理不同的逻辑
      */
     private void processBalanceType(BalancetypeEnum balanceType, ExportTransferVo vo, CashExportReq req) {
+        if (vo.getAccounts() == null) {
+            return;
+        }
         switch (balanceType) {
             case L:
                 handleLedgerBalance(vo, req);
@@ -223,7 +226,8 @@ public class InstrumentBalanceHandle implements ExportDifferentialStrategy {
         List<ExportTransferVo> ttlList = new ArrayList<>();
 //        List<Vcbtradingacc> vcbtradingaccs = fetchVcbtradingaccPaginated();
         List<Vcbtradingacc> vcbtradingaccs = vcbtradingaccMapper.selectByExampleWithLimit();
-        Map<String, ExportTransferVo> voMap = balanceVos.stream()
+        List<ExportTransferVo> voList = balanceVos.stream().filter(vo -> vo.getAccounts() != null).collect(Collectors.toList());
+        Map<String, ExportTransferVo> voMap = voList.stream()
                 .collect(Collectors.toMap(
                                 e -> e.getClntCode() + e.getInstrument() + e.getMarketId() + e.getAccounts(),
                                 Function.identity(),
@@ -329,7 +333,12 @@ public class InstrumentBalanceHandle implements ExportDifferentialStrategy {
                 // 根据 BalanceType 动态处理
                 processBalanceType(req.getBalanceType(), vo, vcbtradingacc, sameList, abnormalList);
             }else {
-                exclusiveList.add(vo);
+                if (vo.getAccounts() == null) {
+                    vo.setReason("Abnormal account");
+                    abnormalList.add(vo);
+                }else {
+                    exclusiveList.add(vo);
+                }
             }
         }
     }

@@ -114,6 +114,9 @@ public class CashBalanceHandle implements ExportDifferentialStrategy {
      * 根据 BalanceType 处理不同的逻辑
      */
     private void processBalanceType(BalancetypeEnum balanceType, ExportTransferVo vo, CashExportReq req) {
+        if (vo.getAccounts() == null) {
+            return;
+        }
         switch (balanceType) {
             case L:
                 handleLedgerBalance(vo, req);
@@ -210,7 +213,9 @@ public class CashBalanceHandle implements ExportDifferentialStrategy {
         List<ExportTransferVo> ttlList = new ArrayList<>();
         List<Vcbaccount> vcbaccounts = fetchVcbaccountPaginated();
 
-        Map<String, BigDecimal> map = balanceVos.stream()
+        List<ExportTransferVo> voList = balanceVos.stream().filter(vo -> vo.getAccounts() != null).collect(Collectors.toList());
+
+        Map<String, BigDecimal> map = voList.stream()
                 .collect(Collectors.toMap(
                         e -> e.getClntCode().trim() + e.getAccounts().trim() + e.getCcy(),
                         ExportTransferVo::getBalance,
@@ -316,7 +321,12 @@ public class CashBalanceHandle implements ExportDifferentialStrategy {
                 // 根据 BalanceType 动态处理
                 processBalanceType(req.getBalanceType(), balanceVo, vcbaccount, sameList, abnormalList);
             } else {
-                exclusiveList.add(balanceVo);
+                if (balanceVo.getAccounts() == null) {
+                    balanceVo.setReason("Abnormal account");
+                    abnormalList.add(balanceVo);
+                }else {
+                    exclusiveList.add(balanceVo);
+                }
             }
         }
     }
