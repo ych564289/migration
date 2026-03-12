@@ -50,3 +50,8 @@ from
     ( Select Distinct ClntCode from ClntMarketAcctTypeSum where SettleMethod = 'CHEQUE' and AcctType = 'CASH') dvp
     on normal.clntcode = dvp.ClntCode
 
+SELECT *
+FROM employees
+ORDER BY employee_id
+OFFSET 10 ROWS        -- 跳过前10条记录
+    FETCH FIRST 10 ROWS ONLY;  -- 获取接下来的10条记录
