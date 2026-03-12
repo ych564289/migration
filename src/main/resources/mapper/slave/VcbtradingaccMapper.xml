@@ -2116,4 +2116,35 @@
 
 
     </select>
+  <select id="selectByExampleAndIn" resultType="com.example.migration.dao.slave.entity.Vcbtradingacc">
+    SELECT clientid, instrumentid, marketid, tradingaccseq
+    FROM vcbtradingacc
+    WHERE 1=1
+    <if test="clientIds != null">
+      and CLIENTID in
+      <foreach item="item" collection="clientIds" index="index" separator="," close=")" open="(">
+        #{item}
+      </foreach>
+    </if>
+    <if test="accountSeqs != null">
+      and TRADINGACCSEQ in
+      <foreach item="item" collection="accountSeqs" index="index" separator="," close=")" open="(">
+        #{item}
+      </foreach>
+    </if>
+    <if test="marketIds != null">
+      and MARKETID in
+      <foreach item="item" collection="marketIds" index="index" separator="," close=")" open="(">
+        #{item}
+      </foreach>
+    </if>
+    <if test="integers != null">
+      and INSTRUMENTID in
+      <foreach item="item" collection="integers" index="index" separator="," close=")" open="(">
+        #{item}
+      </foreach>
+    </if>
+
+
+  </select>
 </mapper>

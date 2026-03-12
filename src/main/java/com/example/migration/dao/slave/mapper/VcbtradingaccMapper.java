@@ -72,4 +72,6 @@ public interface VcbtradingaccMapper {
     int updateByExample(@Param("record") Vcbtradingacc record, @Param("example") VcbtradingaccExample example);
 
     List<Vcbtradingacc> selectByExampleWithLimit();
+
+    List<Vcbtradingacc> selectByExampleAndIn(@Param("clientIds") List<String> clientIds,@Param("accountSeqs") List<Integer> accountSeqs,@Param("marketIds") List<String> marketIds,@Param("integers") List<String> integers);
 }

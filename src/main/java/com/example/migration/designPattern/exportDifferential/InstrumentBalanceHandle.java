@@ -404,7 +404,8 @@ public class InstrumentBalanceHandle implements ExportDifferentialStrategy {
                 criteria.andTradingaccseqIn(accountSeqs);
                 criteria.andMarketidIn(marketIds);
                 criteria.andInstrumentidIn(integers);
-                return vcbtradingaccMapper.selectByExample(example);
+//                return vcbtradingaccMapper.selectByExample(example);
+                return vcbtradingaccMapper.selectByExampleAndIn(clientIds,accountSeqs,marketIds, integers);
             };
             Future<List<Vcbtradingacc>> future = executorService.submit(task);
             futures.add(future);
