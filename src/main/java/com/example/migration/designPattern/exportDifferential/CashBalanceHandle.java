@@ -353,10 +353,10 @@ public class CashBalanceHandle implements ExportDifferentialStrategy {
             default:
                 throw new IllegalArgumentException("Unsupported BalanceType: " + balanceType);
         }
-        balanceVo.setTtlLedgerbal(ttlValue);
+        balanceVo.setTtlLedgerbal(ttlValue.abs());
 
         // 统一比较逻辑
-        if (ttlValue.abs().compareTo(balanceVo.getBalance().abs()) == 0) {
+        if (ttlValue.abs().compareTo(balanceVo.getBalance()) == 0) {
             balanceVo.setReason("Match");
             sameList.add(balanceVo);
         } else {

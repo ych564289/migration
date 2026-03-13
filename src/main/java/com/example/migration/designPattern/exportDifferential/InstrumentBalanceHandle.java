@@ -358,9 +358,9 @@ public class InstrumentBalanceHandle implements ExportDifferentialStrategy {
             default:
                 throw new IllegalArgumentException("Unsupported BalanceType: " + balanceType);
         }
-        vo.setLedgerqty(ttlValue);
+        vo.setLedgerqty(ttlValue.abs());
         // 统一比较逻辑
-        if (ttlValue.abs().compareTo(vo.getBalance().abs()) == 0) {
+        if (ttlValue.abs().compareTo(vo.getBalance()) == 0) {
             vo.setReason("Match");
             sameList.add(vo);
         } else {
