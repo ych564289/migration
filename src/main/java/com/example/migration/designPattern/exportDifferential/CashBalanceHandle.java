@@ -136,7 +136,8 @@ public class CashBalanceHandle implements ExportDifferentialStrategy {
     private void handleLedgerBalance(ExportTransferVo vo, CashExportReq req) {
         Vcbaccount info = vo.getVcbaccountInfo();
         BigDecimal total = calculateTotalFromVcbaccount(info);
-        if (vo.getBalance().abs().compareTo(total) == 0) {
+        BigDecimal subtract = vo.getBalance().abs().subtract(info.getLedgerbal().abs());
+        if (subtract.abs().compareTo(total) == 0) {
             vo.setReason("Timegap");
             return;
         }

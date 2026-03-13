@@ -148,7 +148,8 @@ public class InstrumentBalanceHandle implements ExportDifferentialStrategy {
     private void handleLedgerBalance(ExportTransferVo vo, CashExportReq req) {
         Vcbtradingacc info = vo.getVcbtradingaccInfo();
         BigDecimal total = calculateTotalFromVcbtradingacc(info);
-        if (vo.getBalance().abs().compareTo(total) == 0) {
+        BigDecimal subtract = vo.getBalance().abs().subtract(info.getLedgerqty().abs());
+        if (subtract.abs().compareTo(total) == 0) {
             vo.setReason("Timegap");
             return;
         }
