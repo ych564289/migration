@@ -391,7 +391,7 @@ public class CashBalanceHandle implements ExportDifferentialStrategy {
             if (views != null && !views.isEmpty()) {
                 for (CmsView view : views) {
                     SpCashBalanceClosingAsAt closing = new SpCashBalanceClosingAsAt();
-                    BeanUtils.copyProperties(view, closing);
+                    BeanUtils.copyProperties(closingAsAt, closing);
                     closingAsAt.setAccounts(view.getDefaulttradingacc());
                     closingAsAtList.add(closing);
                 }
