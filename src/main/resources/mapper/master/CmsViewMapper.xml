@@ -202,12 +202,12 @@
     <select id="queryCmsViewList" resultType="com.example.migration.dao.master.entity.CmsView">
       select
         normal.ClntCode as accountcode,
-        case when dvp.ClntCode is not null  then 'DVP'
-             when normal.AcctType =  'CASH' then 'CASH'
-             when normal.AcctType =  'CUST' then 'CASH'
-             when normal.AcctType =  'MRGN' then 'MRGN'
-             when normal.Lender =  'Y' then 'SBL'
-             when normal.borrower = 'Y' then 'SBL'
+        case when dvp.ClntCode is not null  then '3'
+             when normal.AcctType =  'CASH' then '1'
+             when normal.AcctType =  'CUST' then '1'
+             when normal.AcctType =  'MRGN' then '2'
+             when normal.Lender =  'Y' then '4'
+             when normal.borrower = 'Y' then '4'
           end as defaulttradingacc
       from
         (select distinct clnt.ClntCode, typ.AcctType, typ.Lender , typ.Borrower  from clnt clnt , ClntAcctType typ

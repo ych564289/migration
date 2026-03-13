@@ -438,7 +438,7 @@ public class CashBalanceHandle implements ExportDifferentialStrategy {
             }
         }
         for (ExportTransferVo balanceVo : balanceVos) {
-            balanceVo.setAccounts(AcctTypeEnum.getByCode(balanceVo.getAccounts()));
+//            balanceVo.setAccounts(AcctTypeEnum.getByCode(balanceVo.getAccounts()));
             balanceVo.setCcy(CcyTypeEnum.getByCodeMapping(balanceVo.getCcy()));
         }
         return balanceVos;

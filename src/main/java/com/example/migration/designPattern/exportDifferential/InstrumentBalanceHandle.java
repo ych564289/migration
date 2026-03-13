@@ -509,9 +509,9 @@ public class InstrumentBalanceHandle implements ExportDifferentialStrategy {
                 }
             }
         }
-        for (ExportTransferVo balanceVo : balanceVos) {
-            balanceVo.setAccounts(AcctTypeEnum.getByCode(balanceVo.getAccounts()));
-        }
+//        for (ExportTransferVo balanceVo : balanceVos) {
+//            balanceVo.setAccounts(AcctTypeEnum.getByCode(balanceVo.getAccounts()));
+//        }
         return balanceVos;
     }
 
