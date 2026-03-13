@@ -1,5 +1,6 @@
 package com.example.migration.designPattern.exportDifferential;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.excel.util.StringUtils;
 import com.example.migration.dao.master.entity.*;
 import com.example.migration.dao.master.mapper.CmsViewMapper;
@@ -22,6 +23,7 @@ import com.example.migration.pojo.export.vo.ExportTransferVo;
 import com.example.migration.pojo.export.vo.InstrumentSQLVo;
 import com.example.migration.pojo.export.vo.SpCashBalanceVo;
 import org.apache.ibatis.session.RowBounds;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -146,12 +148,12 @@ public class InstrumentBalanceHandle implements ExportDifferentialStrategy {
     private void handleLedgerBalance(ExportTransferVo vo, CashExportReq req) {
         Vcbtradingacc info = vo.getVcbtradingaccInfo();
         BigDecimal total = calculateTotalFromVcbtradingacc(info);
-        if (vo.getBalance().compareTo(total) == 0) {
+        if (vo.getBalance().abs().compareTo(total) == 0) {
             vo.setReason("Timegap");
             return;
         }
         BigDecimal sum = calculateSumFromMQOrders(req, vo);
-        if (vo.getBalance().compareTo(sum) == 0) {
+        if (vo.getBalance().abs().compareTo(sum) == 0) {
             vo.setReason("MQTimegap");
             return;
         }
@@ -358,9 +360,9 @@ public class InstrumentBalanceHandle implements ExportDifferentialStrategy {
             default:
                 throw new IllegalArgumentException("Unsupported BalanceType: " + balanceType);
         }
-        vo.setLedgerqty(ttlValue.abs());
+        vo.setLedgerqty(ttlValue);
         // 统一比较逻辑
-        if (ttlValue.abs().compareTo(vo.getBalance()) == 0) {
+        if (ttlValue.abs().compareTo(vo.getBalance().abs()) == 0) {
             vo.setReason("Match");
             sameList.add(vo);
         } else {
@@ -444,18 +446,31 @@ public class InstrumentBalanceHandle implements ExportDifferentialStrategy {
                 .collect(Collectors.toList());
 //        List<CmsView> cmsViews = fetchCmsViewsInParallel(spInstrumentBalanceClosingAsAts);
         List<CmsView> cmsViews = cmsViewMapper.queryCmsViewList();
-        Map<String, String> acctMap = cmsViews.stream()
-                .collect(Collectors.toMap(CmsView::getAccountcode, CmsView::getDefaulttradingacc, (a, b) -> a));
+        Map<String, List<CmsView>> acctMap = cmsViews.stream()
+                .collect(Collectors.groupingBy(CmsView::getAccountcode));
 
         // 设置TTLMarketID、账户类型
         List<TTLMarketBoard> ttlMarketBoards = ttlMarketBoardMapper.selectByExample(null);
         Map<String, String> ttlMarketIDMap = ttlMarketBoards.stream()
                 .collect(Collectors.toMap(TTLMarketBoard::getMarket, TTLMarketBoard::getTtlmarketid, (a, b) -> a));
+        List<SpInstrumentBalanceClosingAsAt> closingAsAts = new ArrayList<>();
         for (SpInstrumentBalanceClosingAsAt closingAsAt : spInstrumentBalanceClosingAsAts) {
-            closingAsAt.setAccounts(acctMap.getOrDefault(closingAsAt.getClntCode(), ""));
-            closingAsAt.setTtlMarketID(ttlMarketIDMap.getOrDefault(closingAsAt.getMarket(), ""));
+            List<CmsView> views = acctMap.get(closingAsAt.getClntCode());
+            if (views != null && !views.isEmpty()) {
+                for (CmsView view : views) {
+                    if (ObjectUtil.isEmpty(ttlMarketIDMap.get(closingAsAt.getMarket()))){
+                        continue;
+                    }
+                    SpInstrumentBalanceClosingAsAt closing = new SpInstrumentBalanceClosingAsAt();
+                    BeanUtils.copyProperties(closingAsAt, closing);
+                    closing.setAccounts(view.getDefaulttradingacc());
+                    closing.setTtlMarketID(ttlMarketIDMap.getOrDefault(closingAsAt.getMarket(), ""));
+                    closingAsAts.add( closing);
+                }
+            }
+
         }
-        Map<String, Map<String, Map<String, Map<String, List<SpInstrumentBalanceClosingAsAt>>>>> groupedData = spInstrumentBalanceClosingAsAts.stream()
+        Map<String, Map<String, Map<String, Map<String, List<SpInstrumentBalanceClosingAsAt>>>>> groupedData = closingAsAts.stream()
                 .collect(Collectors.groupingBy(
                         SpInstrumentBalanceClosingAsAt::getClntCode,
                         Collectors.groupingBy(
@@ -484,7 +499,6 @@ public class InstrumentBalanceHandle implements ExportDifferentialStrategy {
                                         vo.setBalance(instrumentEntry.getValue().stream()
                                                 .map(SpInstrumentBalanceClosingAsAt::getAsAt)
                                                 .filter(Objects::nonNull) // 过滤空值
-                                                .map(BigDecimal::abs)
                                                 .reduce(BigDecimal.ZERO, BigDecimal::add));
                                         balanceVos.add(vo);
                                     }

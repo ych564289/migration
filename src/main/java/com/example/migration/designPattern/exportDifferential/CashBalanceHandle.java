@@ -21,6 +21,7 @@ import com.example.migration.pojo.export.vo.CashBalanceSQLVo;
 import com.example.migration.pojo.export.vo.ExportTransferVo;
 import com.example.migration.pojo.export.vo.SpCashBalanceVo;
 import org.apache.ibatis.session.RowBounds;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -135,12 +136,12 @@ public class CashBalanceHandle implements ExportDifferentialStrategy {
     private void handleLedgerBalance(ExportTransferVo vo, CashExportReq req) {
         Vcbaccount info = vo.getVcbaccountInfo();
         BigDecimal total = calculateTotalFromVcbaccount(info);
-        if (vo.getBalance().compareTo(total) == 0) {
+        if (vo.getBalance().abs().compareTo(total) == 0) {
             vo.setReason("Timegap");
             return;
         }
         BigDecimal sum = calculateSumFromMQOrders(req, vo);
-        if (vo.getBalance().compareTo(sum) == 0) {
+        if (vo.getBalance().abs().compareTo(sum) == 0) {
             vo.setReason("MQTimegap");
             return;
         }
@@ -198,7 +199,7 @@ public class CashBalanceHandle implements ExportDifferentialStrategy {
         List<CashBalanceSQLVo> filteredSqlList = sqlList.stream()
                 .filter(e -> e.getClientid().equals(vo.getClntCode())
                         && e.getCcy().equals(vo.getCcy())
-                        && e.getIssueamt().abs().compareTo(vo.getBalance()) == 0)
+                        && e.getIssueamt().abs().compareTo(vo.getBalance().abs()) == 0)
                 .collect(Collectors.toList());
 
         if (!filteredSqlList.isEmpty()) {
@@ -353,10 +354,10 @@ public class CashBalanceHandle implements ExportDifferentialStrategy {
             default:
                 throw new IllegalArgumentException("Unsupported BalanceType: " + balanceType);
         }
-        balanceVo.setTtlLedgerbal(ttlValue.abs());
+        balanceVo.setTtlLedgerbal(ttlValue);
 
         // 统一比较逻辑
-        if (ttlValue.abs().compareTo(balanceVo.getBalance()) == 0) {
+        if (ttlValue.abs().compareTo(balanceVo.getBalance().abs()) == 0) {
             balanceVo.setReason("Match");
             sameList.add(balanceVo);
         } else {
@@ -380,18 +381,26 @@ public class CashBalanceHandle implements ExportDifferentialStrategy {
 
 //        List<CmsView> cmsViews = fetchCmsViewsInParallel(spCashBalanceClosingAsAts);
         List<CmsView> cmsViews = cmsViewMapper.queryCmsViewList();
-        Map<String, String> acctMap = cmsViews.stream()
-                .collect(Collectors.toMap(CmsView::getAccountcode, CmsView::getDefaulttradingacc, (a, b) -> a));
+        Map<String, List<CmsView>> acctMap = cmsViews.stream()
+                .collect(Collectors.groupingBy(CmsView::getAccountcode));
 
         // 设置账户信息
+        List<SpCashBalanceClosingAsAt> closingAsAtList = new ArrayList<>();
         for (SpCashBalanceClosingAsAt closingAsAt : spCashBalanceClosingAsAts) {
-            String account = acctMap.getOrDefault(closingAsAt.getClntCode(), ""); // 防止空指针
-            closingAsAt.setAccounts(account);
+            List<CmsView> views = acctMap.get(closingAsAt.getClntCode());
+            if (views != null && !views.isEmpty()) {
+                for (CmsView view : views) {
+                    SpCashBalanceClosingAsAt closing = new SpCashBalanceClosingAsAt();
+                    BeanUtils.copyProperties(view, closing);
+                    closingAsAt.setAccounts(view.getDefaulttradingacc());
+                    closingAsAtList.add(closing);
+                }
+            }
         }
 
         // 分组数据
         Map<String, Map<String, Map<String, List<SpCashBalanceClosingAsAt>>>> groupedData =
-                spCashBalanceClosingAsAts.stream()
+                closingAsAtList.stream()
                         .collect(Collectors.groupingBy(
                                 SpCashBalanceClosingAsAt::getClntCode,
                                 Collectors.groupingBy(
@@ -419,7 +428,6 @@ public class CashBalanceHandle implements ExportDifferentialStrategy {
                                     vo.setBalance(currencyEntry.getValue().stream()
                                             .map(SpCashBalanceClosingAsAt::getAsAt)
                                             .filter(Objects::nonNull) // 过滤空值
-                                            .map(BigDecimal::abs)
                                             .reduce(BigDecimal.ZERO, BigDecimal::add));
                                     balanceVos.add(vo);
                                 }
