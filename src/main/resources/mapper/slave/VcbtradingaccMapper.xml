@@ -2117,7 +2117,7 @@
 
     </select>
   <select id="selectByExampleAndIn" resultType="com.example.migration.dao.slave.entity.Vcbtradingacc">
-    SELECT clientid, instrumentid, marketid, tradingaccseq
+    SELECT *
     FROM vcbtradingacc
     WHERE 1=1
     <if test="clientIds != null">
