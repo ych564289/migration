@@ -62,3 +62,24 @@ SELECT CLIENTID , TRADINGACCSUBSTATUSID   FROM SCTRADINGACCSTATUSDETAIL  WHERE T
     SELECT DISTINCT CLIENTID    FROM SCTRADINGACCSTATUSDETAIL   WHERE  TRADINGACCSEQ = 4 AND TRADINGACCSUBSTATUSID  IN (16,19,21,22,23,24,7,8,9) -- AND CLIENTID = '000056'
 
 )
+
+SELECT active_client.*, tradable_HKEX.clientid AS have_HKEX_trading_market, tradable_MAMK.clientid  AS have_MAMK_trading_market, tradable_SZMK.clientid   AS have_SZMK_trading_market
+
+     ,ac_bal.currencyid, ac_bal.csettled, HKBCAN.clientid AS have_HK_BCAN, SZBCAN.clientid AS have_sz_bcan, SHBCAN.clientid AS have_SJ_bcan
+
+FROM (
+
+         SELECT CLIENTID , TRADINGACCSUBSTATUSID   FROM SCTRADINGACCSTATUSDETAIL  WHERE TRADINGACCSEQ = 1 AND TRADINGACCSUBSTATUSID  = 12  AND CLIENTID NOT IN (
+
+             SELECT DISTINCT CLIENTID    FROM SCTRADINGACCSTATUSDETAIL   WHERE  TRADINGACCSEQ = 1 AND TRADINGACCSUBSTATUSID  IN (16,19,21,22,23,24,7,8,9) -- AND CLIENTID = '000056'
+
+         )) active_client
+         LEFT OUTER JOIN (SELECT DISTINCT clientid FROM SCTRADINGACCMARKET WHERE TRADINGACCSEQ = 1 AND marketid = 'HKEX') tradable_HKEX ON  active_client.clientid = tradable_HKEX.clientid
+         LEFT OUTER JOIN (SELECT DISTINCT clientid FROM SCTRADINGACCMARKET WHERE TRADINGACCSEQ = 1 AND marketid = 'MAMK') tradable_MAMK ON  active_client.clientid = tradable_MAMK.clientid
+         LEFT OUTER JOIN (SELECT DISTINCT clientid FROM SCTRADINGACCMARKET WHERE TRADINGACCSEQ = 1 AND marketid = 'SZMK') tradable_SZMK ON  active_client.clientid = tradable_SZMK.clientid
+         LEFT OUTER JOIN (SELECT * FROM VCBACCOUNT WHERE csettled > 0 AND accountseq = 1 ) ac_bal ON active_client.clientid = ac_bal.clientid
+
+         LEFT OUTER JOIN (select DISTINCT clientid, marketid, INVESTORCODESTATUS from SCTradingAccMarketBrokerInvestorCode where marketid IN ('HKEX') AND TRADINGACCSEQ = 1 AND INVESTORCODESTATUS = 'A') HKBCAN ON  active_client.clientid = HKBCAN.clientid
+         LEFT OUTER JOIN (select DISTINCT clientid, marketid, INVESTORCODESTATUS from SCTradingAccMarketBrokerInvestorCode where marketid IN ('SZMK') AND TRADINGACCSEQ = 1 AND INVESTORCODESTATUS = 'A') SZBCAN ON  active_client.clientid = SZBCAN.clientid
+         LEFT OUTER JOIN (select DISTINCT clientid, marketid, INVESTORCODESTATUS from SCTradingAccMarketBrokerInvestorCode where marketid IN ('MAMK') AND TRADINGACCSEQ = 1 AND INVESTORCODESTATUS = 'A') SHBCAN ON  active_client.clientid = SHBCAN.clientid
+ORDER BY 1
